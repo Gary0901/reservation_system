@@ -1,11 +1,49 @@
 import { useState } from 'react';
 import Head from 'next/head';
+import DaySheets,{ BookingList } from './day_sheet'; // 導入 DaySheets 和 BookingList
 
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [showMonthPicker,setShowMonthPicker] = useState(false);
+  const [showBookingList, setShowBookingList] = useState(false)
   
+  // 預約資料(實際應用中可能從api獲取)
+  const bookingsData = [
+    {
+      id: 1,
+      title: '羽球場A四小時',
+      time: '10:00 ~ 14:00',
+      occupancy: 0,
+      maxOccupancy: 4,
+      price: 230
+    },
+    {
+      id: 2,
+      title: '羽球場B四小時',
+      time: '10:00 ~ 14:00',
+      occupancy: 2,
+      maxOccupancy: 4,
+      price: 230
+    },
+    {
+      id: 3,
+      title: '羽球場A三小時',
+      time: '14:30 ~ 17:30',
+      occupancy: 1,
+      maxOccupancy: 4,
+      price: 190
+    },
+    {
+      id: 4,
+      title: '羽球場B三小時',
+      time: '14:30 ~ 17:30',
+      occupancy: 4,
+      maxOccupancy: 4,
+      price: 190
+    },
+  ]
+
   // 取得當前月份的天數
   const getDaysInMonth = (year, month) => {
     return new Date(year, month + 1, 0).getDate();
@@ -37,14 +75,21 @@ export default function Calendar() {
     
     return days;
   };
-  
+
   // 處理日期選擇
   const handleDateSelect = (day) => {
     if (day) {
       const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
       setSelectedDate(newDate);
+      setShowBookingList(true); // 選擇日期後顯示預約列表
     }
   };
+
+  // 關閉預約列表
+  const closeBookingList = () => {
+    setShowBookingList(false);
+    setSelectedDate(null);
+  }
   
   // 切換到前一個月
   const goToPrevMonth = () => {
@@ -121,12 +166,17 @@ export default function Calendar() {
             {currentDate.getFullYear()} {getMonthName(currentDate.getMonth())} &#9660;
           </div>
           <div className="flex gap-5">
-            <button onClick={goToPrevMonth} className="bg-transparent border-0 text-xl text-[#719e85] cursor-pointer">
-              &#9664;
-            </button>
-            <button onClick={goToNextMonth} className="bg-transparent border-0 text-xl text-[#719e85] cursor-pointer">
-              &#9654;
-            </button>
+          <button onClick={goToPrevMonth} className="bg-transparent border-0 cursor-pointer p-2">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 4L5 10L12 16" stroke="#719e85" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+
+          <button onClick={goToNextMonth} className="bg-transparent border-0 cursor-pointer p-2">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 4L15 10L8 16" stroke="#719e85" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
           </div>
         </div>
 
@@ -180,6 +230,15 @@ export default function Calendar() {
           </div>
           ))}
         </div>
+
+        {/* 顯示預約列表 */}
+        {showBookingList && selectedDate && (
+          <BookingList
+            selectedDate={selectedDate}
+            onClose={closeBookingList}
+            bookings={bookingsData}
+          />
+        )}
       </div>
     </div>
   );

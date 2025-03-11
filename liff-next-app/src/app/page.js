@@ -54,29 +54,43 @@ export default function Home() {
   const reservationData = [
     {
       id: '1',
-      title: '女網混排四小時$230',
+      title: '羽球場A四小時 $230',
       date: '2025-01-22',
       startTime: '10:00',
       endTime: '14:00',
       price: 230,
       onViewDetails: (res) => console.log('查看明細', res),
       onCancel: (res) => console.log('取消預約', res)
+    },
+    {
+      id: '2',
+      title: '羽球場B三小時 $180',
+      date: '2025-01-30',
+      startTime: '18:00',
+      endTime: '21:00',
+      price: 180,
+      onViewDetails: (res) => console.log('查看明細', res),
+      onCancel: (res) => console.log('取消預約', res)
     }
+
   ];
 
   return (
     <main className="min-h-screen p-4">
-      <h1 className="text-2xl font-bold mb-4 text-center">品朕羽球館</h1>
+      
       
       {!isLoggedIn ? (
-        <div className='flex justify-center'>
-          <button 
-            onClick={handleLogin}
-            className="bg-green-500 text-white px-4 py-2 rounded"
-          >
-            使用LINE登入
-          </button> 
-        </div>
+        <>
+          <h1 className="text-2xl font-bold mb-4 text-center">品朕羽球館</h1>
+          <div className='flex justify-center'>
+            <button 
+              onClick={handleLogin}
+              className="bg-green-500 text-white px-4 py-2 rounded"
+            >
+              使用LINE登入
+            </button> 
+          </div>
+        </>
       ) : (
         <div>
           {/* {profile && (
