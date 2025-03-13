@@ -6,6 +6,9 @@ const connectDB = require('./config/database');
 const app = express();
 const userRoutes = require('./routes/userRoutes')
 const courtRoutes = require('./routes/courtRoutes')
+const timeSlotRoutes = require('./routes/timeSlotRoutes')
+const reservationRoutes = require('./routes/reservationRoutes')
+const notificationRoutes = require('./routes/notificationRoutes')
 
 // 中間件
 app.use(cors());
@@ -15,6 +18,9 @@ app.use(bodyParser.urlencoded({extended:true}));
 // 註冊路由
 app.use('/api/users', userRoutes);
 app.use('/api/courts', courtRoutes);
+app.use('/api/time-slots',timeSlotRoutes)
+app.use('/api/reservations',reservationRoutes)
+app.use('/api/notifications',notificationRoutes)
 
 //簡單的測試路由
 app.get('/api/test',(req,res) => {
