@@ -5,6 +5,11 @@ exports.createOrUpdateUser = async(req, res) => {
     try{
         const {lineId, name} = req.body;
 
+        // 驗證必要欄位
+        if (!lineId || !name) {
+            return res.status(400).json({ message: '缺少必要欄位' });
+        }
+
         //檢查用戶是否存在
         let user = await User.findOne({ lineId })
         if (user) {
@@ -48,5 +53,23 @@ exports.getAllUsers = async(req,res) => {
     } catch (error) {
         console.error('getAllUsers 錯誤:', error);
         res.status(500).json({ message: '服務器錯誤' });
+    }
+}
+
+// 獲取用戶 By LineId 
+exports.getUserByLineId = async(req,res) => {
+    try{
+        const {lineId} = req.params;
+        const user = await User.findOne({lineId});
+        
+        if(!user) {
+            return res.status(404).json({message:'找不到用戶'});
+        }
+        // 添加缺少的返回響應
+        res.status(200).json(user);
+        
+    } catch (error){
+        console.error('getUserByLineId 錯誤:',error);
+        res.status(500).json({message:'服務器錯誤'});
     }
 }

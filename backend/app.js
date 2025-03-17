@@ -1,3 +1,4 @@
+// backend app.js
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -10,8 +11,17 @@ const timeSlotRoutes = require('./routes/timeSlotRoutes')
 const reservationRoutes = require('./routes/reservationRoutes')
 const notificationRoutes = require('./routes/notificationRoutes')
 
+// CORS 配置 - 允許前端網域存取
+const corsOptions = {
+    origin: process.env.FRONTEND_URL || '*',
+    methods:'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials:true,
+    optionSuccessStatus:204,
+};
+
+app.use(cors(corsOptions)); 
+
 // 中間件
-app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 

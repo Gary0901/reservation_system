@@ -1,4 +1,5 @@
 import { LiffProvider } from '@/components/LiffProvider';
+import { UserProvider } from '../components/UseProvider';
 import './globals.css';
 
 export const metadata = {
@@ -11,7 +12,9 @@ export default function RootLayout({ children }) {
     <html lang="zh-TW">
       <body>
         <LiffProvider>
-          {children}
+          <UserProvider>
+            {children}
+          </UserProvider>
         </LiffProvider>
       </body>
     </html>

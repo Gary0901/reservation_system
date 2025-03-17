@@ -17,4 +17,4 @@ router.put('/:id/status',reservationController.updateReservationStatus)
 // 路由 5 刪除預約
 router.delete('/:id',reservationController.deleteReservation)
 
-modeule.exports = router 
+module.exports = router 

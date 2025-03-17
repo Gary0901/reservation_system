@@ -14,6 +14,9 @@ router.get('/:id', userController.getUser);
 // 獲取系統中所有用戶的列表，通常僅供管理員使用
 router.get('/', userController.getAllUsers);
 
+
+// 路由4: 通過LineID獲取用戶 - GET /api/users/line/:lineId 
+router.get('/line/:lineId', userController.getUserByLineId);
 // 如果後續需要添加更多功能，可以繼續添加路由
 // 例如：更新用戶角色、刪除用戶等
 

@@ -1,14 +1,20 @@
 'use client';
 import { useLiffContext } from '@/components/LiffProvider';
+import { useUserContext } from '../components/UseProvider';
 import { useEffect, useState } from 'react';
 import Calendar from './component/calender';
 import MyReservation from './component/reservation';
+import axios from 'axios';
+
+// 設定API base URL - 根據環境調整
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api' 
 
 export default function Home() {
   const { liff, error } = useLiffContext();
-  const [profile, setProfile] = useState(null);
+  const { userId, setUserId, lineProfile, setLineProfile, clearUserData } = useUserContext();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [activeTab, setActiveTab ] = useState('calendar')
+  const [activeTab, setActiveTab ] = useState('calendar');
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (!liff) return;
@@ -22,10 +28,29 @@ export default function Home() {
 
   const fetchUserProfile = async () => {
     try {
+      setLoading(true)
       const profile = await liff.getProfile();
-      setProfile(profile);
+
+      // 更新 context 中的 LINE 資料
+      setLineProfile(profile);
+
+      // 將用戶資料傳送到後端API 
+      const userData = {
+        lineId : profile.userId,
+        name: profile.displayName
+      };
+
+      // 在這裡添加日誌，查看完整的 URL
+      console.log('即將發送請求到:', `${API_BASE_URL}/users`);
+
+      const response = await axios.post(`${API_BASE_URL}/users`,userData);
+      console.log('用戶資料已同步到後端',response.data)
+
+      setUserId(response.data._id);
     } catch (error) {
       console.error('獲取用戶資料失敗：', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -38,7 +63,11 @@ export default function Home() {
     if (!liff) return;
     liff.logout();
     setIsLoggedIn(false);
-    setProfile(null);
+
+    // 清除任何儲存的用戶資料
+    // 清除用戶資料
+    clearUserData();
+
     window.location.reload();
   };
 
@@ -93,20 +122,20 @@ export default function Home() {
         </>
       ) : (
         <div>
-          {/* {profile && (
+          {/* {lineProfile && (
             <div className="mb-4">
               <img 
-                src={profile.pictureUrl} 
+                src={lineProfile.pictureUrl} 
                 alt="用戶頭像" 
                 className="w-16 h-16 rounded-full mb-2"
               />
-              <p>歡迎，{profile.displayName}</p>
+              <p>歡迎，{lineProfile.displayName}</p>
             </div>
           )} */}
           {/* 內容區域，根據activaTab顯示不同組件 */}
           <div className = 'flex-grow'>
             {activeTab === 'calendar' && <Calendar/>}
-            {activeTab === 'myReservation' && <MyReservation reservations = {reservationData}/>}
+            {activeTab === 'myReservation' && <MyReservation/>}
           </div>
           <footer className="fixed bottom-0 left-0 right-0 bg-[#719e85] flex justify-around items-center py-4">
             <button 
