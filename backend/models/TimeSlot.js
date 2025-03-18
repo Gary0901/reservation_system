@@ -18,6 +18,24 @@ const TimeSlotSchema = new mongoose.Schema({
   defaultPrice: {
     type: Number,
     required: true
+  },
+  isTemplate:{
+    type:Boolean,
+    default:false
+  },
+  name:{
+    type:String,
+    required : function() {
+      return this.isTemplate === true;
+    }
+  },
+
+  // 對於實際的時段 (非模板)，我們需要知道日期
+  date:{
+    type:Date,
+    required : function() {
+      return this.isTemplate === false;
+    }
   }
 });
 

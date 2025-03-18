@@ -79,31 +79,6 @@ export default function Home() {
     return <div>正在載入LIFF...</div>;
   }
 
-  // 示範預約數據，實際使用從後端api獲取
-  const reservationData = [
-    {
-      id: '1',
-      title: '羽球場A四小時 $230',
-      date: '2025-01-22',
-      startTime: '10:00',
-      endTime: '14:00',
-      price: 230,
-      onViewDetails: (res) => console.log('查看明細', res),
-      onCancel: (res) => console.log('取消預約', res)
-    },
-    {
-      id: '2',
-      title: '羽球場B三小時 $180',
-      date: '2025-01-30',
-      startTime: '18:00',
-      endTime: '21:00',
-      price: 180,
-      onViewDetails: (res) => console.log('查看明細', res),
-      onCancel: (res) => console.log('取消預約', res)
-    }
-
-  ];
-
   return (
     <main className="min-h-screen p-4">
       

@@ -10,6 +10,9 @@ const courtRoutes = require('./routes/courtRoutes')
 const timeSlotRoutes = require('./routes/timeSlotRoutes')
 const reservationRoutes = require('./routes/reservationRoutes')
 const notificationRoutes = require('./routes/notificationRoutes')
+const operationHourRoutes = require('./routes/OperationHourRoutes')
+
+const initSchedulers = require('./schedulers');
 
 // CORS 配置 - 允許前端網域存取
 const corsOptions = {
@@ -31,6 +34,7 @@ app.use('/api/courts', courtRoutes);
 app.use('/api/time-slots',timeSlotRoutes)
 app.use('/api/reservations',reservationRoutes)
 app.use('/api/notifications',notificationRoutes)
+app.use('/api/operationhour',operationHourRoutes)
 
 //簡單的測試路由
 app.get('/api/test',(req,res) => {
@@ -38,6 +42,10 @@ app.get('/api/test',(req,res) => {
 });
 
 const PORT = process.env.PORT || 5000 
+
+
+// 初始化排程任務
+initSchedulers();
 
 // 啟動服務器
 app.listen(PORT,()=>{
