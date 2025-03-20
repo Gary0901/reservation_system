@@ -28,7 +28,9 @@ const DaySheets = ({ title, time, occupancy, maxOccupancy, price }) => {
           ) : (
             <>
               <span className="text-lg font-medium mr-3 text-gray-600">${price}</span>
-              <button className="bg-[#719e85] text-white py-1 px-4 rounded-md text-sm hover:bg-green-600 transition-colors">
+              <button 
+                className="bg-[#719e85] text-white py-1 px-4 rounded-md text-sm hover:bg-green-600 transition-colors"
+              >
                 預約
               </button>
             </>
@@ -68,16 +70,22 @@ export const BookingList = ({ selectedDate, onClose, bookings = [] }) => {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto divide-y divide-gray-200">
-          {bookings.map(booking => (
-            <DaySheets
-              key={booking.id}
-              title={booking.title}
-              time={booking.time}
-              occupancy={booking.occupancy}
-              maxOccupancy={booking.maxOccupancy}
-              price={booking.price}
-            />
-          ))}
+          {bookings.length === 0 ? (
+            <div className="p-4 text-center text-gray-500">
+              該日期沒有可用的預約時段
+            </div>
+          ) : (
+            bookings.map(booking => (
+              <DaySheets
+                key={booking.id}
+                title={booking.title}
+                time={booking.time}
+                occupancy={booking.occupancy}
+                maxOccupancy={booking.maxOccupancy}
+                price={booking.price}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>

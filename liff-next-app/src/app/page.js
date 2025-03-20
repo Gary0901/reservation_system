@@ -65,7 +65,6 @@ export default function Home() {
     setIsLoggedIn(false);
 
     // 清除任何儲存的用戶資料
-    // 清除用戶資料
     clearUserData();
 
     window.location.reload();
@@ -97,20 +96,10 @@ export default function Home() {
         </>
       ) : (
         <div>
-          {/* {lineProfile && (
-            <div className="mb-4">
-              <img 
-                src={lineProfile.pictureUrl} 
-                alt="用戶頭像" 
-                className="w-16 h-16 rounded-full mb-2"
-              />
-              <p>歡迎，{lineProfile.displayName}</p>
-            </div>
-          )} */}
           {/* 內容區域，根據activaTab顯示不同組件 */}
           <div className = 'flex-grow'>
-            {activeTab === 'calendar' && <Calendar/>}
-            {activeTab === 'myReservation' && <MyReservation/>}
+            {activeTab === 'calendar' && <Calendar />}
+            {activeTab === 'myReservation' && <MyReservation />}
           </div>
           <footer className="fixed bottom-0 left-0 right-0 bg-[#719e85] flex justify-around items-center py-4">
             <button 

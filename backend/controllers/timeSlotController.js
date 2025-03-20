@@ -36,13 +36,25 @@ exports.createTimeSlot = async(req,res) => {
 // 獲取所有時間槽
 exports.getAllTimeSlot = async(req,res) => {
     try{
+        console.log("有呼喚這支api")
         // 增加查詢參數，可以根據模板還是實際時段進行篩選
-        const { isTemplate } = req.query;
+        const { isTemplate, date  } = req.query;
 
         let query = {}
         if (isTemplate !== undefined) {
             query.isTemplate = isTemplate === 'true'
         }
+        if (date) {
+            const startDate = new Date(date);
+            startDate.setHours(0,0,0,0);
+
+            const endDate = new Date(date);
+            endDate.setHours(23, 59, 59, 999);
+
+            query.date = { $gte: startDate, $lte: endDate };
+        }
+
+        console.log("查詢條件:",query); // 調適用
 
         const timeSlots = await TimeSlot.find(query).populate('courtId');
         res.status(200).json(timeSlots);
@@ -76,7 +88,7 @@ exports.getTimeSlotByCourt = async(req,res) => {
             query.isTemplate = isTemplate === 'true';
         }
 
-        const timeSlots = await TimeSlot.find({query}).populate('courtId');
+        const timeSlots = await TimeSlot.find(query).populate('courtId');
         res.status(200).json(timeSlots)
     } catch(error){
         console.error('getTimeSlotByCourt 錯誤',error)

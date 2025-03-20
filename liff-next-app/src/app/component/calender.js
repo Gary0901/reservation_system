@@ -1,48 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
-import DaySheets,{ BookingList } from './day_sheet'; // 導入 DaySheets 和 BookingList
+import axios from 'axios';
+import DaySheets, { BookingList } from './day_sheet';
+
+// 設定API base URL - 根據環境調整
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
-  const [showMonthPicker,setShowMonthPicker] = useState(false);
-  const [showBookingList, setShowBookingList] = useState(false)
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [showBookingList, setShowBookingList] = useState(false);
+  const [bookingsData, setBookingsData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   
-  // 預約資料(實際應用中可能從api獲取)
-  const bookingsData = [
-    {
-      id: 1,
-      title: '羽球場A四小時',
-      time: '10:00 ~ 14:00',
-      occupancy: 0,
-      maxOccupancy: 4,
-      price: 230
-    },
-    {
-      id: 2,
-      title: '羽球場B四小時',
-      time: '10:00 ~ 14:00',
-      occupancy: 2,
-      maxOccupancy: 4,
-      price: 230
-    },
-    {
-      id: 3,
-      title: '羽球場A三小時',
-      time: '14:30 ~ 17:30',
-      occupancy: 1,
-      maxOccupancy: 4,
-      price: 190
-    },
-    {
-      id: 4,
-      title: '羽球場B三小時',
-      time: '14:30 ~ 17:30',
-      occupancy: 4,
-      maxOccupancy: 4,
-      price: 190
-    },
-  ]
+  // 處理日期格式化為 YYYY-MM-DD
+  const formatDateForAPI = (date) => {
+    if (!date) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   // 取得當前月份的天數
   const getDaysInMonth = (year, month) => {
@@ -76,11 +56,72 @@ export default function Calendar() {
     return days;
   };
 
+  // 從API獲取時段資料
+  const fetchTimeslots = async (date) => {
+    if (!date) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // 從API獲取指定日期的時段
+      const formattedDate = formatDateForAPI(date);
+      console.log('正在獲取日期:', formattedDate, '的時段資料');
+      
+      const response = await axios.get(`${API_BASE_URL}/time-slots`, {
+        params: { 
+          date: formattedDate,
+          isTemplate:'false'
+        }
+      });
+      
+      console.log('API 回傳的時段資料:', response.data);
+      
+      // 將API返回的資料轉換為前端所需格式
+      const formattedData = response.data.map(slot => {
+        // 嘗試從courtId獲取場地名稱
+        let courtName = "";
+        if (slot.courtId && typeof slot.courtId === 'object') {
+          courtName = slot.courtId.name || "";
+        } else if (slot.courtId) {
+          // 如果courtId只是ID而不是對象，嘗試用它來判斷場地
+          courtName = slot.courtId.includes("A") ? "A" : 
+                      slot.courtId.includes("B") ? "B" : "";
+        }
+        
+        // 或者直接從name屬性判斷
+        let courtLetter = "";
+        if (slot.name) {
+          // 如果名稱包含 "A" 或 "B"，直接提取
+          if (slot.name.includes("A")) courtLetter = "A";
+          else if (slot.name.includes("B")) courtLetter = "B";
+        }
+        
+        return {
+          id: slot._id,
+          title: `羽球場${courtLetter || courtName}${slot.name ? ` ${slot.name}` : ""}`,
+          time: `${slot.startTime} ~ ${slot.endTime}`,
+          occupancy: 0, // 這個可能需要從另一個API獲取
+          maxOccupancy: 4, // 暫時設定為固定值
+          price: slot.defaultPrice
+        };
+      });
+      
+      setBookingsData(formattedData);
+    } catch (err) {
+      console.error('獲取時段資料失敗:', err);
+      setError('獲取時段資料時發生錯誤');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 處理日期選擇
   const handleDateSelect = (day) => {
     if (day) {
       const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
       setSelectedDate(newDate);
+      fetchTimeslots(newDate);
       setShowBookingList(true); // 選擇日期後顯示預約列表
     }
   };
@@ -89,7 +130,7 @@ export default function Calendar() {
   const closeBookingList = () => {
     setShowBookingList(false);
     setSelectedDate(null);
-  }
+  };
   
   // 切換到前一個月
   const goToPrevMonth = () => {
@@ -111,7 +152,7 @@ export default function Calendar() {
   const handleMonthSelect = (month) => {
     setCurrentDate(new Date(currentDate.getFullYear(), month, 1));
     setShowMonthPicker(false);
-  }
+  };
 
   // 切換月份選擇器顯示狀態
   const toggleMonthPicker = () => {
@@ -238,6 +279,22 @@ export default function Calendar() {
             onClose={closeBookingList}
             bookings={bookingsData}
           />
+        )}
+
+        {/* 載入中狀態 */}
+        {loading && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-4 rounded-md shadow-md">
+              <p className="text-gray-800">載入中...</p>
+            </div>
+          </div>
+        )}
+
+        {/* 錯誤訊息 */}
+        {error && (
+          <div className="fixed bottom-20 left-0 right-0 bg-red-500 text-white p-2 text-center">
+            {error}
+          </div>
         )}
       </div>
     </div>
