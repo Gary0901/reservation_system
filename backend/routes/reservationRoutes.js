@@ -14,7 +14,10 @@ router.get('/',reservationController.getAllReservations)
 // 路由 4 更新預約狀態
 router.put('/:id/status',reservationController.updateReservationStatus)
 
-// 路由 5 刪除預約
+// 路由 5 更新預約資訊
+router.put('/:id',reservationController.updateReservation)
+
+// 路由 6 刪除預約
 router.delete('/:id',reservationController.deleteReservation)
 
 module.exports = router 

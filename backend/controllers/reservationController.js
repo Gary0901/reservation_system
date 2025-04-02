@@ -6,7 +6,7 @@ const Notification = require('../models/Notification');
 // 創建新預約
 exports.createReservation = async(req,res) => {
     try{
-        const {userId,courtId,date,startTime,endTime,price,people_num} = req.body;
+        const {userId,courtId,date,startTime,endTime,price,people_num,phone} = req.body;
         
         // 檢查用戶是否存在
         const user = await User.findById(userId)
@@ -17,6 +17,11 @@ exports.createReservation = async(req,res) => {
         const court = await Court.findById(courtId);
         if(!court) {
             return res.status(404).json({message:'找不到場地'})
+        }
+
+        //檢查電話是否提供
+        if(!phone) {
+            return res.status(400).json({message:'電話號碼為必填項'})
         }
 
         //檢查時間槽是否已經被預約
@@ -38,7 +43,8 @@ exports.createReservation = async(req,res) => {
             startTime,
             endTime,
             price,
-            people_num 
+            people_num,
+            phone
         })
 
         await reservation.save()
@@ -122,6 +128,35 @@ exports.updateReservationStatus = async(req,res) =>{
         res.status(500).json({ message: '服務器錯誤' });
     }
 };
+
+// 更新預約（包括電話）
+exports.updateReservation = async(req, res) => {
+    try {
+        const { phone, date, startTime, endTime, people_num, price } = req.body;
+        
+        const reservation = await Reservation.findById(req.params.id);
+        
+        if (!reservation) {
+            return res.status(404).json({ message: '找不到預約' });
+        }
+        
+        // 更新電話和其他可能的欄位
+        if (phone) reservation.phone = phone;
+        if (date) reservation.date = new Date(date);
+        if (startTime) reservation.startTime = startTime;
+        if (endTime) reservation.endTime = endTime;
+        if (people_num) reservation.people_num = people_num;
+        if (price) reservation.price = price;
+        
+        await reservation.save();
+        
+        res.status(200).json(reservation);
+    } catch (error) {
+        console.error('updateReservation 錯誤:', error);
+        res.status(500).json({ message: '服務器錯誤' });
+    }
+};
+
 // 刪除預約
 exports.deleteReservation = async(req,res) => {
     try{

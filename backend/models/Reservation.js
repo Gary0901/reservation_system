@@ -35,6 +35,10 @@ const ReservationSchema = new mongoose.Schema({
     people_num: {
         type:Number,
         default:1
+    },
+    phone: {
+        type:String,
+        required:true
     }
 })
 

@@ -141,117 +141,185 @@ exports.deleteTimeSlot = async(req, res) => {
     }
 };
 
-// 根據模板生成時段
+// 根據模板生成時段（修正版）
 exports.generateTimeSlotsFromTemplates = async(req, res) => {
     try {
         const { startDate, daysToGenerate = 7 } = req.body;
+        console.log(`開始生成從 ${startDate} 起 ${daysToGenerate} 天的時段`);
         
         if (!startDate) {
             return res.status(400).json({ message: '必須提供開始日期 (startDate)' });
         }
         
-        // 獲取所有啟用的球場
-        const courts = await Court.find({ isActive: true });
+        // 獲取基礎數據
+        const [courts, operationHours, allTemplates] = await Promise.all([
+            Court.find({ isActive: true }),
+            OperationHour.find(),
+            TimeSlot.find({ isTemplate: true })
+        ]);
         
-        if (courts.length === 0) {
-            return res.status(404).json({ message: '找不到可用的球場' });
+        // 數據驗證
+        if (courts.length === 0 || operationHours.length === 0 || allTemplates.length === 0) {
+            return res.status(404).json({ 
+                message: `缺少必要數據：球場(${courts.length})、營業時間(${operationHours.length})或模板(${allTemplates.length})` 
+            });
         }
         
-        // 獲取所有營業時間設定
-        const operationHours = await OperationHour.find();
+        console.log(`找到 ${courts.length} 個球場, ${operationHours.length} 個營業時間設定, ${allTemplates.length} 個時段模板`);
         
-        if (operationHours.length === 0) {
-            return res.status(404).json({ message: '找不到營業時間設定' });
-        }
+        // 按場地ID組織模板
+        const templatesByCourtId = {};
+        allTemplates.forEach(template => {
+            const courtIdStr = template.courtId.toString();
+            if (!templatesByCourtId[courtIdStr]) {
+                templatesByCourtId[courtIdStr] = [];
+            }
+            templatesByCourtId[courtIdStr].push(template);
+        });
         
-        // 獲取所有時段模板
-        const templates = await TimeSlot.find({ isTemplate: true });
-        
-        if (templates.length === 0) {
-            return res.status(404).json({ message: '找不到時段模板' });
-        }
-        
-        // 開始生成時段
-        const generatedTimeSlots = [];
+        // 準備日期範圍
         const startDateObj = new Date(startDate);
+        startDateObj.setHours(0, 0, 0, 0); // 重設時分秒，確保一致性
         
-        // 將時間轉換為分鐘的輔助函數
+        const dateRange = [];
+        for (let i = 0; i < daysToGenerate; i++) {
+            const date = new Date(startDateObj);
+            date.setDate(startDateObj.getDate() + i);
+            dateRange.push(date);
+        }
+        
+        console.log(`準備生成 ${dateRange.length} 天的時段`);
+        
+        // 輔助函數：時間轉分鐘
         const timeToMinutes = (timeStr) => {
             const [hours, minutes] = timeStr.split(':').map(Number);
             return hours * 60 + minutes;
         };
         
-        // 檢查模板是否適用於營業時間的輔助函數
-        const isTemplateApplicable = (template, operationHour) => {
-            const templateStartMinutes = timeToMinutes(template.startTime);
-            const templateEndMinutes = timeToMinutes(template.endTime);
-            const openMinutes = timeToMinutes(operationHour.openTime);
-            const closeMinutes = timeToMinutes(operationHour.closeTime);
-            
-            return templateStartMinutes >= openMinutes && templateEndMinutes <= closeMinutes;
-        };
+        // 獲取日期範圍內所有已存在的時段
+        const existingTimeSlots = await TimeSlot.find({
+            isTemplate: false,
+            date: { 
+                $gte: dateRange[0], 
+                $lte: new Date(dateRange[dateRange.length - 1].getTime() + 24 * 60 * 60 * 1000 - 1) 
+            }
+        });
         
-        // 對於每一天
-        for (let dayOffset = 0; dayOffset < daysToGenerate; dayOffset++) {
-            const currentDate = new Date(startDateObj);
-            currentDate.setDate(startDateObj.getDate() + dayOffset);
-            
-            const dayOfWeek = currentDate.getDay(); // 0-6，0是週日
-            
-            // 查找當天的營業時間
+        console.log(`發現 ${existingTimeSlots.length} 個已存在的時段`);
+        
+        // 創建一個哈希表來快速檢查時段是否存在 (改進版)
+        const existingSlotMap = {};
+        existingTimeSlots.forEach(slot => {
+            // 格式化為 YYYY-MM-DD 格式
+            const slotDate = slot.date.toISOString().split('T')[0];
+            const courtId = slot.courtId.toString();
+            const key = `${courtId}-${slotDate}-${slot.startTime}-${slot.endTime}`;
+            existingSlotMap[key] = true;
+        });
+        
+        // 準備新增的時段
+        const newTimeSlots = [];
+        const processedKeys = new Set(); // 用於追蹤本次處理中已添加的時段
+        
+        // 對於每個日期
+        for (const currentDate of dateRange) {
+            const dayOfWeek = currentDate.getDay();
             const operationHour = operationHours.find(oh => oh.dayOfWeek === dayOfWeek);
             
             // 如果當天不營業，跳過
             if (!operationHour || operationHour.isHoliday) {
+                console.log(`${currentDate.toISOString().split('T')[0]} 不營業，跳過`);
                 continue;
             }
             
+            const dateStr = currentDate.toISOString().split('T')[0];
+            console.log(`處理 ${dateStr} (星期${dayOfWeek})`);
+            console.log(`營業時間: ${operationHour.openTime} - ${operationHour.closeTime}`);
+            
+            const openMinutes = timeToMinutes(operationHour.openTime);
+            const closeMinutes = timeToMinutes(operationHour.closeTime);
+            
             // 對於每個球場
             for (const court of courts) {
-                // 找出所有適用於當天營業時間的模板
-                const applicableTemplates = templates.filter(template => 
-                    isTemplateApplicable(template, operationHour)
-                );
+                const courtId = court._id.toString();
+                console.log(`處理球場: ${court.name || courtId}`);
                 
-                // 根據每個適用的模板生成時段
-                for (const template of applicableTemplates) {
-                    // 檢查該時段是否已存在
-                    const existingTimeSlot = await TimeSlot.findOne({
-                        courtId: court._id,
-                        date: currentDate,
-                        startTime: template.startTime,
-                        endTime: template.endTime,
-                        isTemplate: false
-                    });
+                // 獲取該球場的模板
+                const courtTemplates = templatesByCourtId[courtId] || [];
+                console.log(`找到 ${courtTemplates.length} 個該球場的模板`);
+                
+                // 對於該球場的每個模板
+                for (const template of courtTemplates) {
+                    const templateStartMinutes = timeToMinutes(template.startTime);
+                    const templateEndMinutes = timeToMinutes(template.endTime);
                     
-                    // 如果時段已存在，跳過
-                    if (existingTimeSlot) {
-                        continue;
+                    // 檢查模板是否適用
+                    if (templateStartMinutes >= openMinutes && templateEndMinutes <= closeMinutes) {
+                        // 生成唯一鍵來檢查重複
+                        const key = `${courtId}-${dateStr}-${template.startTime}-${template.endTime}`;
+                        
+                        // 檢查是否已存在於資料庫或已在當前批次中添加
+                        if (!existingSlotMap[key] && !processedKeys.has(key)) {
+                            newTimeSlots.push({
+                                courtId: court._id,
+                                startTime: template.startTime,
+                                endTime: template.endTime,
+                                defaultPrice: template.defaultPrice,
+                                isTemplate: false,
+                                date: new Date(currentDate),
+                                name: template.name
+                            });
+                            
+                            // 將新時段加入跟踪集合，防止在同一批次中重複添加
+                            processedKeys.add(key);
+                            existingSlotMap[key] = true;
+                        } else {
+                            console.log(`時段已存在或已處理，跳過: ${template.startTime}-${template.endTime} @ ${dateStr} (${courtId})`);
+                        }
+                    } else {
+                        console.log(`模板 ${template.startTime}-${template.endTime} 不適用於當前營業時間`);
                     }
-                    
-                    // 創建新時段
-                    const newTimeSlot = new TimeSlot({
-                        courtId: court._id,
-                        startTime: template.startTime,
-                        endTime: template.endTime,
-                        defaultPrice: template.defaultPrice,
-                        isTemplate: false,
-                        date: currentDate,
-                        name: template.name // 可選擇是否保留模板名稱
-                    });
-                    
-                    await newTimeSlot.save();
-                    generatedTimeSlots.push(newTimeSlot);
                 }
             }
         }
         
+        console.log(`準備創建 ${newTimeSlots.length} 個新時段`);
+        
+        // 批量插入新時段
+        let result = [];
+        if (newTimeSlots.length > 0) {
+            result = await TimeSlot.insertMany(newTimeSlots);
+            console.log(`成功批量創建 ${result.length} 個時段`);
+        } else {
+            console.log('沒有新時段需要創建');
+        }
+        
         res.status(201).json({
-            message: `成功生成 ${generatedTimeSlots.length} 個時段`,
-            generatedTimeSlots
+            message: `成功生成 ${result.length} 個時段`,
+            generatedCount: result.length,
+            totalExisting: existingTimeSlots.length
         });
     } catch (error) {
         console.error('generateTimeSlotsFromTemplates 錯誤:', error);
-        res.status(500).json({ message: '服務器錯誤' });
+        res.status(500).json({ message: '服務器錯誤', error: error.message });
     }
 };
+
+// 刪除所有非模板時段
+exports.deleteAllNonTemplateTimeSlots = async(req,res) => {
+    try {
+        console.log('開始刪除所有非模板時段...');
+
+        const result = await TimeSlot.deleteMany({isTemplate : false});
+
+        console.log(`成功刪除${result.deletedCount} 個非模板時段`);
+
+        res.status(200).json({
+            message:`成功刪除${result.deletedCount} 個非模板時段`,
+            deletedCount: result.deletedCount 
+        });
+    } catch (error) {
+        console.error('deleteAllNonTemplateTimeSlots 錯誤:', error);
+        res.status(500).json({ message: '服務器錯誤' });
+    }
+}
