@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import axios from 'axios';
-import DaySheets, { BookingList } from './day_sheet';
+import DaySheets from './day_sheet';
+import { CourtBookingTable } from './courtBookingTable'; // 引入新的表格組件
 
 // 設定API base URL - 根據環境調整
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
@@ -272,9 +273,9 @@ export default function Calendar() {
           ))}
         </div>
 
-        {/* 顯示預約列表 */}
+        {/* 顯示新的表格式預約介面 */}
         {showBookingList && selectedDate && (
-          <BookingList
+          <CourtBookingTable
             selectedDate={selectedDate}
             onClose={closeBookingList}
             bookings={bookingsData}

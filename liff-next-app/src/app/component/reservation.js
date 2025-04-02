@@ -6,11 +6,90 @@ import { useUserContext } from '@/components/UseProvider';
 // 設定API base URL - 根據環境調整
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
 
+// 新增的預約詳情彈出視窗組件
+const ReservationDetailsPopup = ({ reservation,onClose }) => {
+  if(!reservation) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">預約明細</h2>
+          <button 
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <div className="space-y-3">
+          <div className="bg-[#f9f5ea] p-3 rounded">
+            <h3 className="font-semibold text-lg">{reservation.title}</h3>
+            <p className="text-sm text-[#7B7B7B] mt-1">狀態: {getStatusText(reservation.status)}</p>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-sm font-medium">預約日期</p>
+              <p className="text-sm text-[#7B7B7B]">{reservation.date}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium">預約時間</p>
+              <p className="text-sm text-[#7B7B7B]">{reservation.startTime} ~ {reservation.endTime}</p>
+            </div>
+            {/* {reservation.people_num && (
+              <div>
+                <p className="text-sm font-medium">預約人數</p>
+                <p className="text-sm text-[#7B7B7B]">{reservation.people_num}人</p>
+              </div>
+            )} */}
+            <div>
+              <p className="text-sm font-medium">預約價格</p>
+              <p className="text-sm text-[#7B7B7B]">${reservation.price}</p>
+            </div>
+            {/* <div>
+              <p className="text-sm font-medium">預約編號</p>
+              <p className="text-sm text-[#7B7B7B]">{reservation.id}</p>
+            </div> */}
+          </div>
+          
+          {reservation.status !== 'cancelled' && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <button
+                onClick={() => onClose()} 
+                className="w-full bg-[#4D9E50] text-white py-2 px-4 rounded transition duration-200"
+              >
+                確認
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 取得狀態文字函數 (需要在組件外定義以便共享)
+const getStatusText = (status) => {
+  switch(status) {
+    case 'pending': return '待確認';
+    case 'confirmed': return '已確認';
+    case 'cancelled': return '已取消';
+    default: return '未知狀態';
+  }
+};
+
 export default function MyReservation() {
   const {userId} = useUserContext();
   const [reservations, setReservations] = useState([]);
   const [loading,setLoading] = useState(true);
   const [error,setError] = useState(null); 
+  // 新增狀態用於控制彈出視窗
+  const [selectedReservation, setSelectedReservation] = useState(null);
+  const [showDetailsPopup, setShowDetailsPopup] = useState(false);
 
   useEffect(()=>{
     if (userId) {
@@ -46,11 +125,18 @@ export default function MyReservation() {
     }
   }
 
-  // 明細按鈕
-  const handleViewDetails = (reservations) => {
-    console.log('查看預約明細：', reservations);
-    // 這裡可以加入顯示詳細信息的邏輯
-  }
+  // 改進後的明細按鈕處理函數
+  const handleViewDetails = (reservation) => {
+    console.log('查看預約明細：', reservation);
+    setSelectedReservation(reservation);
+    setShowDetailsPopup(true);
+  };
+
+  // 關閉彈出視窗的函數
+  const handleCloseDetailsPopup = () => {
+    setShowDetailsPopup(false);
+    setSelectedReservation(null);
+  };
 
   // 取消按鈕
   const handleCancelReservation = async (reservationId) => {
@@ -62,18 +148,17 @@ export default function MyReservation() {
       
       // 重新獲取預約清單
       fetchReservations();
+      
+      // 如果目前正在查看的預約被取消，則更新彈出視窗內容
+      if (selectedReservation && selectedReservation.id === reservationId) {
+        setSelectedReservation({
+          ...selectedReservation,
+          status: 'cancelled'
+        });
+      }
     } catch (error) {
       console.error('取消預約失敗：', error);
       alert('取消預約失敗，請稍後再試。');
-    }
-  };
-  // 取得狀態文字
-  const getStatusText = (status) => {
-    switch(status) {
-      case 'pending': return '待確認';
-      case 'confirmed': return '已確認';
-      case 'cancelled': return '已取消';
-      default: return '未知狀態';
     }
   };
 
@@ -109,7 +194,7 @@ export default function MyReservation() {
                   <span className="text-sm text-[#7B7B7B]">{reservation.date} {reservation.startTime} ~ {reservation.endTime}</span>
                 </div>
                 <div className="mt-2">
-                  <span className="text-sm text-[#7B7B7B]">人數: {reservation.people_num}人</span>
+                  {/* <span className="text-sm text-[#7B7B7B]">人數: {reservation.people_num}人</span> */}
                   <span className="text-sm text-[#7B7B7B] ml-4">價格: ${reservation.price}</span>
                 </div>
               </div>
@@ -139,6 +224,13 @@ export default function MyReservation() {
         <div className="text-center py-8 text-gray-500 bg-[#f9f5ea] rounded-md shadow">
           目前沒有預約
         </div>
+      )}
+      {/* 預約詳情彈出視窗 */}
+      {showDetailsPopup && selectedReservation && (
+        <ReservationDetailsPopup 
+          reservation={selectedReservation} 
+          onClose={handleCloseDetailsPopup} 
+        />
       )}
     </div>
   );
