@@ -43,16 +43,22 @@ app.get('/api/test',(req,res) => {
 
 const PORT = process.env.PORT || 5000 
 
-
-// 初始化排程任務
-initSchedulers();
-
-// 啟動服務器
-app.listen(PORT,()=>{
-    console.log(`服務器運行於http://localhost:${PORT}`);
-});
-
-// 連接資料庫
+// 連接資料庫並啟動服務器
 connectDB()
+  .then(() => {
+    console.log('資料庫連接成功');
+    
+    // 初始化排程任務
+    initSchedulers();
+    
+    // 啟動服務器
+    app.listen(PORT, () => {
+      console.log(`服務器運行於http://localhost:${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('無法連接到資料庫:', err.message);
+    process.exit(1);
+  });
 
-module.exports = app 
+module.exports = app;
