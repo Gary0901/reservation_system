@@ -111,13 +111,20 @@ export default function MyReservation() {
       const formattedReservations = response.data.map(res =>{
         // 檢查預約日期是否已過期
         const reservationDate = new Date(res.date);
-        const today = new Date();
-        today.setHours(0,0,0,0);
+        const reservationEndTime = res.endTime.split(':');
+        const hour = parseInt(reservationEndTime[0]);
+        const minute = parseInt(reservationEndTime[1]);
+
+        // 設置預約結束的完整日期時間
+        reservationDate.setHours(hour, minute, 0, 0);
+        
+        const now = new Date();
 
         let status = res.status;
-        if (status !== 'cancelled' && reservationDate < today) {
-          status = 'expired'; // 添加過期狀態
+        if (status !== 'cancelled' && reservationDate < now) {
+          status = 'expired'; // 若預約結束時間已過現在時間，則標記為過期
         }
+
         return {
           id: res._id,
           title: res.courtId ? `${res.courtId.name}` : '未知場地',
@@ -126,7 +133,8 @@ export default function MyReservation() {
           endTime: res.endTime,
           price: res.price,
           status: res.status,
-          people_num: res.people_num
+          people_num: res.people_num,
+          rawDate: new Date(res.date) // 用於排序的完整日期對象
         }
       });
 
