@@ -102,29 +102,29 @@ export default function MyReservation() {
     }
   }, [userId]);
 
-  const fetchReservations = async () =>{
-    try{
+  const fetchReservations = async () => {
+    try {
       setLoading(true);
-      console.log('獲取用戶預約，userId:',userId);
+      console.log('獲取用戶預約，userId:', userId);
       const response = await axios.get(`${API_BASE_URL}/reservations/user/${userId}`);
-
-      const formattedReservations = response.data.map(res =>{
+  
+      const formattedReservations = response.data.map(res => {
         // 檢查預約日期是否已過期
         const reservationDate = new Date(res.date);
         const reservationEndTime = res.endTime.split(':');
         const hour = parseInt(reservationEndTime[0]);
         const minute = parseInt(reservationEndTime[1]);
-
+  
         // 設置預約結束的完整日期時間
         reservationDate.setHours(hour, minute, 0, 0);
         
         const now = new Date();
-
+  
         let status = res.status;
         if (status !== 'cancelled' && reservationDate < now) {
           status = 'expired'; // 若預約結束時間已過現在時間，則標記為過期
         }
-
+  
         return {
           id: res._id,
           title: res.courtId ? `${res.courtId.name}` : '未知場地',
@@ -132,17 +132,17 @@ export default function MyReservation() {
           startTime: res.startTime,
           endTime: res.endTime,
           price: res.price,
-          status: res.status,
+          status: status, // 修正：使用計算後的status而不是原始res.status
           people_num: res.people_num,
           rawDate: new Date(res.date) // 用於排序的完整日期對象
         }
       });
-
+  
       setReservations(formattedReservations);
-    } catch(error) {
+    } catch (error) {
       console.error('獲取預約失敗：', error);
       setError('無法獲取預約資料，請稍後再試。');
-    } finally{
+    } finally {
       setLoading(false);
     }
   }
@@ -186,23 +186,23 @@ export default function MyReservation() {
 
   // 根據filterMode篩選預約
   const filteredReservations = reservations.filter(reservation => {
-    if (filterMode === 'upcoming') {
-      return reservation.status !== 'cancelled' && reservation.status !== 'expired';
-    } else { // past
-      return reservation.status === 'cancelled' || reservation.status === 'expired';
-    }
-  }).sort((a, b) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    if (filterMode === 'upcoming') {
-      // 未來預約：從最近的未來日期開始（升序）
-      return a.rawDate - b.rawDate;
-    } else {
-      // 已取消/已過期：從最近的歷史日期開始（降序）
-      return b.rawDate - a.rawDate;
-    }
-  });
+  if (filterMode === 'upcoming') {
+    // 只顯示未過期且未取消的預約
+    return reservation.status !== 'cancelled' && reservation.status !== 'expired';
+  } else { // past
+    // 顯示已取消或已過期的預約
+    return reservation.status === 'cancelled' || reservation.status === 'expired';
+  }
+}).sort((a, b) => {
+  if (filterMode === 'upcoming') {
+    // 未來預約：從最近的未來日期開始（升序）
+    return a.rawDate - b.rawDate;
+  } else {
+    // 已取消/已過期：從最近的歷史日期開始（降序）
+    return b.rawDate - a.rawDate;
+  }
+});
+
 
   if (loading) {
     return (
@@ -319,40 +319,3 @@ export default function MyReservation() {
     </div>
   );
 }
-
-// 使用示例:
-// 
-// // 頁面組件中
-// import MyReservation from '../components/MyReservation';
-// 
-// export default function ReservationPage() {
-//   // 這些資料可以從API獲取
-//   const reservationData = [
-//     {
-//       id: '1',
-//       title: '女網混排四小時$230',
-//       date: '2025-01-22',
-//       startTime: '10:00',
-//       endTime: '14:00',
-//       price: 230,
-//       onViewDetails: (res) => console.log('查看明細', res),
-//       onCancel: (res) => console.log('取消預約', res)
-//     },
-//     {
-//       id: '2',
-//       title: '男網男排三小時$180',
-//       date: '2025-01-30',
-//       startTime: '18:00',
-//       endTime: '21:00',
-//       price: 180,
-//       onViewDetails: (res) => console.log('查看明細', res),
-//       onCancel: (res) => console.log('取消預約', res)
-//     }
-//   ];
-// 
-//   return (
-//     <div>
-//       <MyReservation reservations={reservationData} />
-//     </div>
-//   );
-// }
