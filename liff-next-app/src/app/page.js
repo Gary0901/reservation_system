@@ -81,7 +81,6 @@ export default function Home() {
   return (
     <main className="min-h-screen p-4">
       
-      
       {!isLoggedIn ? (
         <div className="relative min-h-screen flex flex-col items-center justify-center">
         {/* 背景圖片容器 */}
@@ -89,8 +88,9 @@ export default function Home() {
           className="absolute inset-0 bg-cover bg-center opacity-20 z-0"
           style={{
             backgroundImage: "url('/background.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center"
+            backgroundSize: "contain",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat"
           }}
         ></div>
         {/* 登入內容 */}
