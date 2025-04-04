@@ -101,7 +101,7 @@ export default function Home() {
             {activeTab === 'calendar' && <Calendar />}
             {activeTab === 'myReservation' && <MyReservation />}
           </div>
-          <footer className="fixed bottom-0 left-0 right-0 bg-[#719e85] flex justify-around items-center py-4">
+          <footer className="fixed bottom-0 left-0 right-0 bg-[#719e85] flex justify-around items-center py-4 z-10">
             <button 
               onClick={() => setActiveTab('calendar')} 
               className={`flex flex-col items-center p-2 ${activeTab === 'calendar' ? 'text-[#f7ede2]' : 'text-gray-600'}`}

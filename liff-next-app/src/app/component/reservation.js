@@ -174,7 +174,7 @@ export default function MyReservation() {
   const hasReservations = reservations.length > 0;
   
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-lg mx-auto pb-24">
       <h1 className="text-xl font-bold mb-4 px-4">我的預約</h1>
       
       {hasReservations ? (
