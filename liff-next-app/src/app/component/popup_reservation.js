@@ -11,9 +11,10 @@ export const BookingFormDialog = ({ isOpen, onClose, onSubmit, timeSlot, court, 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // 基本驗證
-    if (!phone) {
-      setError('請輸入電話號碼');
+    // 電話號碼驗證 : 必須是10碼且以09開頭 
+    const phoneRegex = /^09\d{8}$/;
+    if (!phone || !phoneRegex.test(phone)) {
+      setError('請輸入有效的手機號碼');
       return;
     }
     
@@ -37,6 +38,17 @@ export const BookingFormDialog = ({ isOpen, onClose, onSubmit, timeSlot, court, 
       setError(err.message || '預約失敗，請稍後再試');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 處理電話號碼輸入變更，可以在這裡添加即時驗證
+  const handlePhoneChange = (e) => {
+    const value = e.target.value;
+    // 只允許輸入數字
+    if (value === '' || /^\d+$/.test(value)) {
+      setPhone(value);
+      // 清除錯誤提示，如果用戶正在修改
+      if (error) setError('');
     }
   };
 
@@ -77,11 +89,13 @@ export const BookingFormDialog = ({ isOpen, onClose, onSubmit, timeSlot, court, 
             <input
               type="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={handlePhoneChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               placeholder="請輸入您的電話號碼"
+              maxLength={10}
               required
             />
+            <p className="text-xs text-gray-500 mt-1">手機號碼必須為10碼且以09開頭</p>
           </div>
           
           {/* <div className="mb-6">
