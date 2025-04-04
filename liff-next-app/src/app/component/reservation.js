@@ -91,6 +91,9 @@ export default function MyReservation() {
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [showDetailsPopup, setShowDetailsPopup] = useState(false);
 
+  // 新增: 篩選模式狀態 
+  const [filterMode,setFilterMode] = useState('upcoming') // 'upcoming' 或 'past; 
+
   useEffect(()=>{
     if (userId) {
       fetchReservations();
@@ -105,16 +108,27 @@ export default function MyReservation() {
       console.log('獲取用戶預約，userId:',userId);
       const response = await axios.get(`${API_BASE_URL}/reservations/user/${userId}`);
 
-      const formattedReservations = response.data.map(res =>({
-        id: res._id,
-        title: res.courtId ? `${res.courtId.name}` : '未知場地',
-        date: new Date(res.date).toLocaleDateString('zh-TW'),
-        startTime: res.startTime,
-        endTime: res.endTime,
-        price: res.price,
-        status: res.status,
-        people_num: res.people_num
-      }))
+      const formattedReservations = response.data.map(res =>{
+        // 檢查預約日期是否已過期
+        const reservationDate = new Date(res.date);
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        let status = res.status;
+        if (status !== 'cancelled' && reservationDate < today) {
+          status = 'expired'; // 添加過期狀態
+        }
+        return {
+          id: res._id,
+          title: res.courtId ? `${res.courtId.name}` : '未知場地',
+          date: new Date(res.date).toLocaleDateString('zh-TW'),
+          startTime: res.startTime,
+          endTime: res.endTime,
+          price: res.price,
+          status: res.status,
+          people_num: res.people_num
+        }
+      });
 
       setReservations(formattedReservations);
     } catch(error) {
@@ -162,6 +176,26 @@ export default function MyReservation() {
     }
   };
 
+  // 根據filterMode篩選預約
+  const filteredReservations = reservations.filter(reservation => {
+    if (filterMode === 'upcoming') {
+      return reservation.status !== 'cancelled' && reservation.status !== 'expired';
+    } else { // past
+      return reservation.status === 'cancelled' || reservation.status === 'expired';
+    }
+  }).sort((a, b) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (filterMode === 'upcoming') {
+      // 未來預約：從最近的未來日期開始（升序）
+      return a.rawDate - b.rawDate;
+    } else {
+      // 已取消/已過期：從最近的歷史日期開始（降序）
+      return b.rawDate - a.rawDate;
+    }
+  });
+
   if (loading) {
     return (
       <div className="max-w-lg mx-auto text-center py-8">
@@ -177,15 +211,45 @@ export default function MyReservation() {
     <div className="max-w-lg mx-auto pb-24">
       <h1 className="text-xl font-bold mb-4 px-4">我的預約</h1>
       
-      {hasReservations ? (
+      {/* 新增: 篩選按鈕 */} 
+      <div className="flex mb-4 px-4">
+        <button
+          className={`flex-1 py-2 px-4 text-center rounded-l-md ${
+            filterMode === 'upcoming' 
+              ? 'bg-[#719e85] text-white' 
+              : 'bg-[#f9f5ea] text-gray-700'
+          }`}
+          onClick={() => setFilterMode('upcoming')}
+        >
+          未來預約
+        </button>
+        <button
+          className={`flex-1 py-2 px-4 text-center rounded-r-md ${
+            filterMode === 'past' 
+              ? 'bg-[#719e85] text-white' 
+              : 'bg-[#f9f5ea] text-gray-700'
+          }`}
+          onClick={() => setFilterMode('past')}
+        >
+          已取消/已過期
+        </button>
+      </div>
+
+      {filteredReservations.length > 0 ? (
         // 有預約資料時，顯示預約列表
         <div className="space-y-4">
-          {reservations.map((reservation, index) => (
+          {filteredReservations.map((reservation, index) => (
             <div key={index} className="bg-[#f9f5ea] p-4 rounded-md shadow mb-4">
               <div className="mb-2">
                 <h2 className="text-base font-semibold flex items-center gap-2">
                   {reservation.title}
-                  <span className='text-sm font-normal'>{getStatusText(reservation.status)}</span>
+                  <span className={`text-sm font-normal ${
+                    reservation.status === 'cancelled' || reservation.status === 'expired' 
+                      ? 'text-red-500' 
+                      : 'text-green-500'
+                  }`}>
+                    {getStatusText(reservation.status)}
+                  </span>
                 </h2>
                 <div className="flex items-center mt-2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -194,13 +258,12 @@ export default function MyReservation() {
                   <span className="text-sm text-[#7B7B7B]">{reservation.date} {reservation.startTime} ~ {reservation.endTime}</span>
                 </div>
                 <div className="mt-2">
-                  {/* <span className="text-sm text-[#7B7B7B]">人數: {reservation.people_num}人</span> */}
-                  <span className="text-sm text-[#7B7B7B] ml-4">價格: ${reservation.price}</span>
+                  <span className="text-sm text-[#7B7B7B]">價格: ${reservation.price}</span>
                 </div>
               </div>
               
-              {/* 按鈕只在非取消狀態時顯示 */}
-              {reservation.status !== 'cancelled' && (
+              {/* 按鈕只在未來預約且非取消狀態時顯示 */}
+              {filterMode === 'upcoming' && (
                 <div className="flex space-x-3 mt-4">
                   <button
                     className="flex-1 bg-[#4D9E50] text-white py-1 px-3 rounded transition duration-200 text-sm"
@@ -216,15 +279,28 @@ export default function MyReservation() {
                   </button>
                 </div>
               )}
+              
+              {/* 已取消/已過期的預約只顯示明細按鈕 */}
+              {filterMode === 'past' && (
+                <div className="flex space-x-3 mt-4">
+                  <button
+                    className="flex-1 bg-[#4D9E50] text-white py-1 px-3 rounded transition duration-200 text-sm"
+                    onClick={() => handleViewDetails(reservation)}
+                  >
+                    明細
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
       ) : (
         // 沒有預約資料時，顯示空狀態
-        <div className="text-center py-8 text-gray-500 bg-[#f9f5ea] rounded-md shadow">
-          目前沒有預約
+        <div className="text-center py-8 text-gray-500 bg-[#f9f5ea] rounded-md shadow mx-4">
+          {filterMode === 'upcoming' ? '目前沒有未來預約' : '目前沒有已取消或已過期的預約'}
         </div>
       )}
+      
       {/* 預約詳情彈出視窗 */}
       {showDetailsPopup && selectedReservation && (
         <ReservationDetailsPopup 
