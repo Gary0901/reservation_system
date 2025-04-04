@@ -78,6 +78,7 @@ const getStatusText = (status) => {
     case 'pending': return '待確認';
     case 'confirmed': return '已確認';
     case 'cancelled': return '已取消';
+    case 'expired' : return '已過期';
     default: return '未知狀態';
   }
 };
