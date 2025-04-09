@@ -21,11 +21,11 @@ export default function Home() {
   const [activeImageIndex, setActiveImageIndex] = useState(0)
 
   const infoImages = [
-    './images/reservation-info-1.png',
-    './images/reservation-info-2.png',
-    './images/reservation-info-3.png',
-    './images/reservation-info-4.png',
-    './images/reservation-info-5.png',
+    '/images/reservation-info-1.png',
+    '/images/reservation-info-2.png',
+    '/images/reservation-info-3.png',
+    '/images/reservation-info-4.png',
+    '/images/reservation-info-5.png',
   ]
 
   useEffect(() => {
