@@ -72,7 +72,12 @@ export default function Home() {
   };
 
   const handleMap = () => {
-    
+    const placeId = "ChIJy_g1ZEgjaDQR8UbtDK1mZro"; 
+    const placeName = "品朕羽球館"; // 請替換為您想去的地點名稱
+    const encodedPlaceName = encodeURIComponent(placeName);
+    const mapsUrlWithPlaceId = `https://www.google.com/maps/search/?api=1&query=${encodedPlaceName}&query_place_id=${placeId}`;
+
+    window.open(mapsUrlWithPlaceId, '_blank');
   }
 
   const handleReservationInfo = () => {
@@ -105,26 +110,28 @@ export default function Home() {
         {/* 登入內容 */}
         <div className="relative z-10 text-center">
           <h1 className="text-2xl font-bold mb-4 text-center">品朕羽球館</h1>
-          <div className='flex justify-center'>
+          <div className='flex flex-col justify-center '>
             <button 
               onClick={handleLogin}
-              className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg shadow-md transition duration-300"
+              className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 mb-2"
             >
-              使用LINE登入
+              < i class="ri-line-line mr-2"></i>使用LINE登入
             </button>
 
             {/* 地圖標示按鈕 */}
             <button
               onClick = {handleMap}
+              className="bg-[#51669e] hover:bg-green-600 text-white px-6 py-3 rounded-lg shadow-md transition duration-300 mb-2"
             >
-              <i className="ri-map-pin-line mr-2"></i> 地圖標示
+              <i className="ri-map-pin-line mr-2"></i>位置資訊
             </button>
 
             {/* 預約須知按鈕 */}
             <button
               onClick={handleReservationInfo}
+              className="bg-[#f2e275] hover:bg-green-600 text-white px-6 py-3 rounded-lg shadow-md transition duration-300"
             >
-              <i className="ri-reserved-fill mr-2"></i> 預約須知
+              <i class="ri-reserved-line text-[#23360a]"></i><span className='text-[#23360a]'>預約須知</span>
             </button>
           </div>
         </div>
