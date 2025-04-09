@@ -81,7 +81,7 @@ export default function Home() {
   }
 
   const handleReservationInfo = () => {
-
+    alert("123")
   }
 
   if (error) {
