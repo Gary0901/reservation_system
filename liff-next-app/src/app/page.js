@@ -15,7 +15,18 @@ export default function Home() {
   const { userId, setUserId, lineProfile, setLineProfile, clearUserData } = useUserContext();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab ] = useState('calendar');
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
+
+  const infoImages = [
+    './images/reservation-info-1.png',
+    './images/reservation-info-2.png',
+    './images/reservation-info-3.png',
+    './images/reservation-info-4.png',
+    './images/reservation-info-5.png',
+  ]
 
   useEffect(() => {
     if (!liff) return;
@@ -80,9 +91,26 @@ export default function Home() {
     window.open(mapsUrlWithPlaceId, '_blank');
   }
 
+  // 更新預約須知函數
   const handleReservationInfo = () => {
-    alert("123")
+    setShowInfoModal(true);
+    setActiveImageIndex(0);
   }
+
+  // 下一張圖片
+  const nextImage = () =>{
+    setActiveImageIndex((prev) => (prev === infoImages.length - 1 ? 0 : prev + 1));
+  }
+
+  // 上一張圖片
+  const prevImage = () =>{
+    setActiveImageIndex((prev) => (prev === 0 ? infoImages.length - 1 : prev - 1));
+  }
+
+  // 關閉模態彈窗
+  const closeInfoModal = () => {
+    setShowInfoModal(false);
+  };
 
   if (error) {
     return <div>初始化LIFF時發生錯誤：{error.message}</div>;
@@ -135,6 +163,71 @@ export default function Home() {
             </button>
           </div>
         </div>
+        {/* 預約須知模態彈窗 */}
+        {showInfoModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg w-full max-w-md mx-4 overflow-hidden">
+              <div className="p-4 bg-[#719e85] text-white flex justify-between items-center">
+                <h3 className="text-xl font-bold">預約須知</h3>
+                <button 
+                  onClick={closeInfoModal}
+                  className="text-white hover:text-gray-200"
+                >
+                  <i className="ri-close-line text-2xl"></i>
+                </button>
+              </div>
+              
+              <div className="relative">
+                {/* 圖片輪播 */}
+                <div className="w-full overflow-hidden" style={{ height: '70vh' }}>
+                  <div className="h-full flex items-center justify-center bg-gray-100">
+                    <img 
+                      src={infoImages[activeImageIndex]} 
+                      alt={`預約須知 ${activeImageIndex + 1}`} 
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </div>
+                </div>
+                
+                {/* 導航按鈕 */}
+                <button 
+                  onClick={prevImage}
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 rounded-full text-white"
+                >
+                  <i className="ri-arrow-left-s-line text-2xl"></i>
+                </button>
+                <button 
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 rounded-full text-white"
+                >
+                  <i className="ri-arrow-right-s-line text-2xl"></i>
+                </button>
+              </div>
+              
+              {/* 分頁指示器 */}
+              <div className="p-3 bg-white flex justify-center">
+                <div className="flex space-x-2">
+                  {infoImages.map((_, index) => (
+                    <button 
+                      key={index} 
+                      onClick={() => setActiveImageIndex(index)}
+                      className={`w-3 h-3 rounded-full ${activeImageIndex === index ? 'bg-[#719e85]' : 'bg-gray-300'}`}
+                    ></button>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="p-4 flex justify-center">
+                <button 
+                  onClick={closeInfoModal}
+                  className="bg-[#719e85] hover:bg-green-700 text-white px-6 py-2 rounded-lg"
+                >
+                  關閉
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       ) : (
         <div>
