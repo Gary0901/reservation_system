@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Calendar from './component/calender';
 import MyReservation from './component/reservation';
 import axios from 'axios';
+import 'remixicon/fonts/remixicon.css';
 
 // 設定API base URL - 根據環境調整
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api' 
@@ -70,6 +71,14 @@ export default function Home() {
     window.location.reload();
   };
 
+  const handleMap = () => {
+    
+  }
+
+  const handleReservationInfo = () => {
+
+  }
+
   if (error) {
     return <div>初始化LIFF時發生錯誤：{error.message}</div>;
   }
@@ -102,6 +111,20 @@ export default function Home() {
               className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg shadow-md transition duration-300"
             >
               使用LINE登入
+            </button>
+
+            {/* 地圖標示按鈕 */}
+            <button
+              onClick = {handleMap}
+            >
+              <i className="ri-map-pin-line mr-2"></i> 地圖標示
+            </button>
+
+            {/* 預約須知按鈕 */}
+            <button
+              onClick={handleReservationInfo}
+            >
+              <i className="ri-reserved-fill mr-2"></i> 預約須知
             </button>
           </div>
         </div>
