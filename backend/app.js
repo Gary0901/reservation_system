@@ -17,10 +17,10 @@ const initSchedulers = require('./schedulers');
 
 // CORS 配置 - 允許前端網域存取
 const corsOptions = {
-    origin: process.env.FRONTEND_URL || '*',
-    methods:'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials:true,
-    optionSuccessStatus:204,
+  origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : ['http://localhost:3000', 'http://192.168.50.232:3000'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204,
 };
 
 app.use(cors(corsOptions)); 
