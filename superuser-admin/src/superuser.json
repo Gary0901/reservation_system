@@ -1,0 +1,16 @@
+{
+    "superusers": [
+      {
+        "email": "admin@example.com",
+        "password": "admin123",
+        "name": "管理員一號",
+        "role": "superadmin"
+      },
+      {
+        "email": "manager@example.com",
+        "password": "manager456",
+        "name": "管理員二號",
+        "role": "manager"
+      }
+    ]
+  }

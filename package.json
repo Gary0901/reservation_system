@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "react-calendar": "^5.1.0",
     "remixicon": "^4.6.0"
   }
 }
