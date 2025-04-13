@@ -19,7 +19,7 @@ function MainPage() {
         const response = await axios.get('https://liff-reservation.zeabur.app/api/reservations');
         
         // 在控制台打印 API 返回的數據，幫助調試
-        console.log('API 返回的預約數據:', response.data);
+        // console.log('API 返回的預約數據:', response.data);
         
         // 檢查是否是數組或包含數組的對象
         let reservationData = [];

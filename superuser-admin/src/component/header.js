@@ -26,7 +26,7 @@ function Header({ user, onLogout }) {
                 模板設定
               </Link>
               <Link to="/timeslots" className={`px-4 py-2 rounded-lg hover:bg-[#4c7d62] transition-colors ${isActive('/timeslots')}`}>
-                時段管理
+                預約紀錄
               </Link>
               <Link to="/user" className={`px-4 py-2 rounded-lg hover:bg-[#4c7d62] transition-colors ${isActive('/user')}`}>
                 用戶管理

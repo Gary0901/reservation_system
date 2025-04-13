@@ -10,6 +10,17 @@ function TemplatePage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationResult, setGenerationResult] = useState(null);
   
+  // New state for editing functionality
+  const [editingTemplate, setEditingTemplate] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    defaultPrice: '',
+    name: '',
+    startTime: '',
+    endTime: ''
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(null);
+  
   const baseUrl = 'https://liff-reservation.zeabur.app';
   
   useEffect(() => {
@@ -100,6 +111,81 @@ function TemplatePage() {
     }
   };
   
+  // Function to open edit modal
+  const openEditModal = (template) => {
+    setEditingTemplate(template);
+    setEditFormData({
+      defaultPrice: template.defaultPrice,
+      name: template.name || '',
+      startTime: template.startTime ? template.startTime.substring(0, 5) : '',
+      endTime: template.endTime ? template.endTime.substring(0, 5) : ''
+    });
+    setIsEditing(true);
+    setUpdateSuccess(null);
+  };
+  
+  // Function to close edit modal
+  const closeEditModal = () => {
+    setIsEditing(false);
+    setEditingTemplate(null);
+    setUpdateSuccess(null);
+  };
+  
+  // Function to handle form input changes
+  const handleEditFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  // Function to update template
+  const updateTemplate = async (e) => {
+    e.preventDefault();
+    
+    if (!editingTemplate) return;
+    
+    try {
+      const response = await fetch(`${baseUrl}/api/time-slots/${editingTemplate._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          courtId: editingTemplate.courtId._id,
+          defaultPrice: editFormData.defaultPrice,
+          isTemplate: true
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      
+      const updatedTemplate = await response.json();
+      
+      // Update the template in the local state
+      setTemplates(prevTemplates => 
+        prevTemplates.map(template => 
+          template._id === updatedTemplate._id ? updatedTemplate : template
+        )
+      );
+      
+      setUpdateSuccess(true);
+      
+      // Close modal after a short delay
+      setTimeout(() => {
+        closeEditModal();
+        fetchTemplates(); // Refresh all templates
+      }, 1500);
+      
+    } catch (err) {
+      console.error("Error updating template:", err);
+      setUpdateSuccess(false);
+    }
+  };
+  
   const courtGroups = groupTemplatesByCourt();
 
   return (
@@ -179,7 +265,7 @@ function TemplatePage() {
                 </div>
                 
                 {group.templates.map(template => (
-                  <div key={template.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div key={template._id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start">
                       <h3 className="text-lg font-semibold">{template.name}</h3>
                     </div>
@@ -190,7 +276,12 @@ function TemplatePage() {
                     </div>
                     
                     <div className="mt-4 flex justify-end space-x-2">
-                      <button className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded">編輯</button>
+                      <button 
+                        className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded"
+                        onClick={() => openEditModal(template)}
+                      >
+                        編輯
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -199,6 +290,63 @@ function TemplatePage() {
           </div>
         )}
       </div>
+      
+      {/* Edit Modal */}
+      {isEditing && editingTemplate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">編輯模板價格</h2>
+            
+            <form onSubmit={updateTemplate}>
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold mb-2">{editingTemplate.name || '未命名模板'}</h3>
+                <p className="text-gray-600 mb-4">
+                  時間: {formatTime(editingTemplate.startTime)} - {formatTime(editingTemplate.endTime)}
+                </p>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">價格</label>
+                <input
+                  type="number"
+                  name="defaultPrice"
+                  value={editFormData.defaultPrice}
+                  onChange={handleEditFormChange}
+                  className="w-full p-2 border rounded-md"
+                />
+              </div>
+              
+              {updateSuccess === true && (
+                <div className="mb-4 p-2 bg-green-100 text-green-700 rounded">
+                  模板更新成功！
+                </div>
+              )}
+              
+              {updateSuccess === false && (
+                <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+                  模板更新失敗，請稍後再試。
+                </div>
+              )}
+              
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  儲存
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
