@@ -165,6 +165,31 @@ export default function MyReservation() {
   // 取消按鈕
   const handleCancelReservation = async (reservationId) => {
     try {
+      // 找到對應預約
+      const reservation = reservations.find(res => res.id === reservationId);
+
+      if (! reservation ){
+        alert('找不到對應預約')
+      }
+
+      // 建立完整的預約日期和時間
+      const reservationDateTime = new Date(reservation.rawDate);
+      const [startHour, startMinute] = reservation.startTime.split(':').map(Number);
+      reservationDateTime.setHours(startHour, startMinute, 0, 0);
+
+      // 計算可取消的最後時間 (預約開始前24小時)
+      const cancelDeadline = new Date(reservationDateTime);
+      cancelDeadline.setHours(cancelDeadline.getHours() - 24);
+
+      // 取得當前時間
+      const now = new Date();
+
+      // 檢查是否可超過取消時間
+      if (now >= cancelDeadline) {
+        alert('無法取消：預約時間24小時內不可取消');
+        return;
+      }
+
       // 呼叫API更新預約狀態為 cancelled
       await axios.put(`${API_BASE_URL}/reservations/${reservationId}/status`, {
         status: 'cancelled'
@@ -185,6 +210,8 @@ export default function MyReservation() {
       alert('取消預約失敗，請稍後再試。');
     }
   };
+
+  // 在渲染時也提示是否可以取消
 
   // 根據filterMode篩選預約
   const filteredReservations = reservations.filter(reservation => {
@@ -269,7 +296,7 @@ export default function MyReservation() {
                 </div>
                 <div className="mt-2 flex justify-between items-center">
                   <span className="text-sm text-[#7B7B7B]">價格: ${reservation.price}</span>
-                  <span className="text-sm text-[#7B7B7B]">當天密碼: ${reservation.password}</span>
+                  <span className="text-sm text-[#7B7B7B]">當天密碼: {reservation.password}</span>
                 </div>
               </div>
               
