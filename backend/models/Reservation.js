@@ -39,6 +39,10 @@ const ReservationSchema = new mongoose.Schema({
     phone: {
         type:String,
         required:true
+    },
+    password: {
+        type:String,
+        default: "******"
     }
 })
 

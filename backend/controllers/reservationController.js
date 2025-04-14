@@ -6,7 +6,7 @@ const Notification = require('../models/Notification');
 // 創建新預約
 exports.createReservation = async(req,res) => {
     try{
-        const {userId,courtId,date,startTime,endTime,price,people_num,phone} = req.body;
+        const {userId,courtId,date,startTime,endTime,price,people_num,phone,password} = req.body;
         
         // 檢查用戶是否存在
         const user = await User.findById(userId)
@@ -44,7 +44,8 @@ exports.createReservation = async(req,res) => {
             endTime,
             price,
             people_num,
-            phone
+            phone,
+            password:password || "******" // 使用提供的密碼或使用默認值
         })
 
         await reservation.save()
@@ -99,7 +100,7 @@ exports.getAllReservations = async(req, res)=>{
 // 更新預約狀態
 exports.updateReservationStatus = async(req,res) =>{
     try{
-        const {status} = req.body 
+        const {status,password} = req.body 
         if (!['pending','confirmed','cancelled'].includes(status)){
             return res.status(400).json({message:'無效的狀態'})
         }
@@ -109,8 +110,14 @@ exports.updateReservationStatus = async(req,res) =>{
         if(!reservation){
             return res.status(404).json({message:'找不到預約'});
         }
-
+        // 更新狀態
         reservation.status = status;
+        
+        //  如果提供了密碼，則更新密碼
+        if (password !== undefined) {
+            reservation.password = password
+        }
+        
         await reservation.save();
 
         const notificaiton = new Notification({
