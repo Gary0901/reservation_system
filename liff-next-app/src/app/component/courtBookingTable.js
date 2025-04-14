@@ -326,7 +326,7 @@ export const CourtBookingTable = ({ selectedDate, onClose, bookings = [] }) => {
                       {bookingInfo.price !== null ? (
                         <>
                           <div className="text-center mb-1">
-                            <span className="text-md font-medium text-gray-700">${bookingInfo.price}</span>
+                            {!isFull && <span className="text-md font-medium text-gray-700">${bookingInfo.price}</span>}
                           </div>
                           <button 
                             className={`w-full py-1 px-2 rounded-md text-white text-sm ${

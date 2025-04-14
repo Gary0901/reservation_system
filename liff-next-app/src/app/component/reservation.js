@@ -135,6 +135,7 @@ export default function MyReservation() {
           price: res.price,
           status: status, // 修正：使用計算後的status而不是原始res.status
           people_num: res.people_num,
+          password:res.password || '', 
           rawDate: new Date(res.date) // 用於排序的完整日期對象
         }
       });
@@ -266,8 +267,9 @@ export default function MyReservation() {
                   </svg>
                   <span className="text-sm text-[#7B7B7B]">{reservation.date} {reservation.startTime} ~ {reservation.endTime}</span>
                 </div>
-                <div className="mt-2">
+                <div className="mt-2 flex justify-between items-center">
                   <span className="text-sm text-[#7B7B7B]">價格: ${reservation.price}</span>
+                  <span className="text-sm text-[#7B7B7B]">當天密碼: ${reservation.password}</span>
                 </div>
               </div>
               
