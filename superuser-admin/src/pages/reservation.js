@@ -10,6 +10,9 @@ function ReservationPage() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [viewMode, setViewMode] = useState('all'); // 'all' 或 'date'
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [password, setPassword] = useState('');
+  const [currentReservationId, setCurrentReservationId] = useState(null);
 
   useEffect(() => {
     const fetchReservations = async () => {
@@ -77,28 +80,33 @@ function ReservationPage() {
     }
   }, [selectedDate, reservations, viewMode]);
 
+  // 顯示密碼輸入模態框並設置當前預約ID
+  const openPasswordModal = (reservationId) => {
+    setCurrentReservationId(reservationId);
+    setPassword('');
+    setShowPasswordModal(true);
+  };
+
   // 處理確認預約
-  const handleConfirmReservation = async (reservationId) => {
-    if (!reservationId) return;
-    
-    // 先向用戶確認
-    if (!window.confirm('確定要將此預約設為已確認狀態嗎？')) {
-      return;
-    }
+  const handleConfirmReservation = async () => {
+    if (!currentReservationId) return;
     
     try {
       setUpdateLoading(true);
-      // 使用 API 更新預約狀態為 confirmed
+      // 使用 API 更新預約狀態為 confirmed，同時發送密碼
       const response = await axios.put(
-        `https://liff-reservation.zeabur.app/api/reservations/${reservationId}/status`,
-        { status: "confirmed" }
+        `https://liff-reservation.zeabur.app/api/reservations/${currentReservationId}/status`,
+        { 
+          status: "confirmed",
+          password: password  // 添加密碼到請求中
+        }
       );
       
       // 如果 API 調用成功，更新本地狀態
       if (response.status === 200) {
         // 更新本地預約列表中的狀態
         const updatedReservations = reservations.map(reservation => {
-          if (reservation._id === reservationId) {
+          if (reservation._id === currentReservationId) {
             return { ...reservation, status: 'confirmed' };
           }
           return reservation;
@@ -108,7 +116,7 @@ function ReservationPage() {
         
         // 同時更新過濾後的預約列表
         const updatedFilteredReservations = filteredReservations.map(reservation => {
-          if (reservation._id === reservationId) {
+          if (reservation._id === currentReservationId) {
             return { ...reservation, status: 'confirmed' };
           }
           return reservation;
@@ -117,6 +125,8 @@ function ReservationPage() {
         setFilteredReservations(updatedFilteredReservations);
       }
       setUpdateLoading(false);
+      setShowPasswordModal(false);  // 關閉模態框
+      setCurrentReservationId(null);
     } catch (err) {
       console.error('確認預約時出錯:', err);
       setError(`無法確認預約: ${err.message}`);
@@ -435,7 +445,7 @@ function ReservationPage() {
                           reservation.status !== 'cancelled' ? (
                             <>
                               <button 
-                                onClick={() => handleConfirmReservation(reservation._id)}
+                                onClick={() => openPasswordModal(reservation._id)}
                                 disabled={reservation.status === 'confirmed' || updateLoading}
                                 className={`text-blue-600 hover:text-blue-900 mr-3 ${
                                   reservation.status === 'confirmed' ? 'opacity-50 cursor-not-allowed' : ''
@@ -470,6 +480,38 @@ function ReservationPage() {
           </div>
         )}
       </div>
+
+      {/* 密碼輸入模態框 */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 shadow-lg w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">設置當日密碼</h3>
+            <p className="text-gray-600 mb-4">請輸入此預約的密碼，使用者將使用此密碼開門</p>
+            <input
+              type="password"
+              className="w-full p-2 border border-gray-300 rounded mb-4"
+              placeholder="輸入密碼"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <div className="flex justify-end space-x-3">
+              <button
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                onClick={() => setShowPasswordModal(false)}
+              >
+                取消
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                onClick={handleConfirmReservation}
+                disabled={!password.trim()}
+              >
+                確認
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
