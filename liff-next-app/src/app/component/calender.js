@@ -67,7 +67,7 @@ export default function Calendar() {
       
       // 從API獲取指定日期的時段
       const formattedDate = formatDateForAPI(date);
-      console.log('正在獲取日期:', formattedDate, '的時段資料');
+      // console.log('正在獲取日期:', formattedDate, '的時段資料');
       
       const response = await axios.get(`${API_BASE_URL}/time-slots`, {
         params: { 
@@ -76,7 +76,7 @@ export default function Calendar() {
         }
       });
       
-      console.log('API 回傳的時段資料:', response.data);
+      // console.log('API 回傳的時段資料:', response.data);
       
       // 將API返回的資料轉換為前端所需格式
       const formattedData = response.data.map(slot => {

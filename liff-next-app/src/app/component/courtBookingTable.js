@@ -76,7 +76,7 @@ export const CourtBookingTable = ({ selectedDate, onClose, bookings = [] }) => {
         );
         
         setReservations(validReservations);
-        console.log('獲取到的預約數據:', validReservations);
+        // console.log('獲取到的預約數據:', validReservations);
       } catch (err) {
         console.error('獲取預約記錄失敗:', err);
         setError('獲取預約記錄時發生錯誤');
@@ -254,12 +254,12 @@ export const CourtBookingTable = ({ selectedDate, onClose, bookings = [] }) => {
         phone: formData.phone
       };
       
-      console.log('發送預約數據:', bookingData);
+      // console.log('發送預約數據:', bookingData);
       
       // 發送預約請求
       const response = await axios.post(`${API_BASE_URL}/reservations`, bookingData);
       
-      console.log('預約成功:', response.data);
+      // console.log('預約成功:', response.data);
       
       // 更新預約列表
       setReservations([...reservations, response.data]);

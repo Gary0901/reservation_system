@@ -53,10 +53,10 @@ export default function Home() {
       };
 
       // 在這裡添加日誌，查看完整的 URL
-      console.log('即將發送請求到:', `${API_BASE_URL}/users`);
+      // console.log('即將發送請求到:', `${API_BASE_URL}/users`);
 
       const response = await axios.post(`${API_BASE_URL}/users`,userData);
-      console.log('用戶資料已同步到後端',response.data)
+      // console.log('用戶資料已同步到後端',response.data)
 
       setUserId(response.data._id);
     } catch (error) {

@@ -106,7 +106,7 @@ export default function MyReservation() {
   const fetchReservations = async () => {
     try {
       setLoading(true);
-      console.log('獲取用戶預約，userId:', userId);
+      // console.log('獲取用戶預約，userId:', userId);
       const response = await axios.get(`${API_BASE_URL}/reservations/user/${userId}`);
   
       const formattedReservations = response.data.map(res => {
@@ -151,7 +151,7 @@ export default function MyReservation() {
 
   // 改進後的明細按鈕處理函數
   const handleViewDetails = (reservation) => {
-    console.log('查看預約明細：', reservation);
+    // console.log('查看預約明細：', reservation);
     setSelectedReservation(reservation);
     setShowDetailsPopup(true);
   };
