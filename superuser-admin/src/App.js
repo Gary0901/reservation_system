@@ -10,23 +10,8 @@ import TemplatePage from './pages/template';
 import TimeslotsPage from './pages/timeslots';
 import UserPage from './pages/user';
 
-// 直接在 JS 檔案中定義 superusers 資料
-const superusersData = {
-  "superusers": [
-    {
-      "email": "admin@example.com",
-      "password": "admin123",
-      "name": "管理員一號",
-      "role": "superadmin"
-    },
-    {
-      "email": "manager@example.com",
-      "password": "manager456",
-      "name": "管理員二號",
-      "role": "manager"
-    }
-  ]
-};
+const API_URL = 'https://liff-reservation.zeabur.app';
+
 
 function App() {
   const [email, setEmail] = useState('');
@@ -35,29 +20,45 @@ function App() {
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     setErrorMessage('');
+    setIsLoading(true);
     
-    // 驗證登入資訊
-    const user = superusersData.superusers.find(
-      user => user.email === email && user.password === password
-    );
-    
-    if (user) {
-      console.log('Login successful:', user);
-      setIsLoggedIn(true);
-      setCurrentUser(user);
-      // 如果勾選了記住我，可以保存到 localStorage
-      if (rememberMe) {
-        localStorage.setItem('rememberedEmail', email);
+    try {
+      // 呼叫後端 API 進行驗證
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        console.log('登入成功:', data.user);
+        setIsLoggedIn(true);
+        setCurrentUser(data.user);
+        
+        // 如果勾選了記住我，可以保存到 localStorage
+        if (rememberMe) {
+          localStorage.setItem('rememberedEmail', email);
+        } else {
+          localStorage.removeItem('rememberedEmail');
+        }
       } else {
-        localStorage.removeItem('rememberedEmail');
+        setErrorMessage(data.message || '登入失敗，請重試');
+        console.log('登入失敗:', data.message);
       }
-    } else {
-      setErrorMessage('電子郵件或密碼不正確，請重試');
-      console.log('Login failed. Invalid credentials.');
+    } catch (error) {
+      console.error('登入錯誤:', error);
+      setErrorMessage('連接服務器時發生錯誤，請稍後再試');
+    } finally {
+      setIsLoading(false);
     }
   };
   
