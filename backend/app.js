@@ -13,6 +13,8 @@ const reservationRoutes = require('./routes/reservationRoutes')
 const notificationRoutes = require('./routes/notificationRoutes')
 const operationHourRoutes = require('./routes/OperationHourRoutes')
 
+const authRoutes = require('./routes/authRoutes')
+
 const initSchedulers = require('./schedulers');
 
 // CORS 配置 - 允許前端網域存取
@@ -36,6 +38,9 @@ app.use('/api/time-slots',timeSlotRoutes)
 app.use('/api/reservations',reservationRoutes)
 app.use('/api/notifications',notificationRoutes)
 app.use('/api/operationhour',operationHourRoutes)
+
+// 註冊認證路由
+app.use('/api/auth', authRoutes);
 
 //簡單的測試路由
 app.get('/api/test',(req,res) => {
