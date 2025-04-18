@@ -309,12 +309,15 @@ export default function MyReservation() {
                   >
                     明細
                   </button>
-                  <button
-                    className="flex-1 bg-[#E57373] text-white py-1 px-3 rounded transition duration-200 text-sm"
-                    onClick={() => handleCancelReservation(reservation.id)}
-                  >
-                    取消
-                  </button>
+                  {/* 增加條件：只有在狀態為 pending 時才顯示取消按鈕 */}
+                    {reservation.status === 'pending' && (
+                      <button
+                        className="flex-1 bg-[#E57373] text-white py-1 px-3 rounded transition duration-200 text-sm"
+                        onClick={() => handleCancelReservation(reservation.id)}
+                      >
+                        取消
+                      </button>
+                    )}
                 </div>
               )}
               
