@@ -13,7 +13,6 @@ function ReservationPage() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [password, setPassword] = useState('');
   const [currentReservationId, setCurrentReservationId] = useState(null);
-  // 刪除了reservationPasswords狀態，因為我們直接使用API返回的password字段
 
   useEffect(() => {
     const fetchReservations = async () => {
@@ -50,8 +49,6 @@ function ReservationPage() {
         setReservations(formattedData);
         setFilteredReservations(formattedData);
         setLoading(false);
-        
-        // 刪除了loadSavedPasswords調用，因為直接使用API返回的password字段
       } catch (err) {
         console.error('獲取預約數據時出錯:', err);
         setError(`無法載入預約數據: ${err.message}`);
@@ -407,6 +404,7 @@ function ReservationPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">預約日期</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">時間</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">預約者</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">電話</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">場地</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">密碼</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">狀態</th>
@@ -424,6 +422,9 @@ function ReservationPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {reservation.userId && reservation.userId.name ? reservation.userId.name : 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {reservation.phone || 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {reservation.courtId && reservation.courtId.name ? reservation.courtId.name : 'N/A'}
@@ -482,7 +483,7 @@ function ReservationPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan="9" className="px-6 py-4 text-center text-gray-500">
                       {viewMode === 'date' ? '這一天沒有預約記錄' : '沒有找到預約數據'}
                     </td>
                   </tr>
