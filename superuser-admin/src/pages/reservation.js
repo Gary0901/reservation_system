@@ -13,6 +13,7 @@ function ReservationPage() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [password, setPassword] = useState('');
   const [currentReservationId, setCurrentReservationId] = useState(null);
+  // 刪除了reservationPasswords狀態，因為我們直接使用API返回的password字段
 
   useEffect(() => {
     const fetchReservations = async () => {
@@ -49,6 +50,8 @@ function ReservationPage() {
         setReservations(formattedData);
         setFilteredReservations(formattedData);
         setLoading(false);
+        
+        // 刪除了loadSavedPasswords調用，因為直接使用API返回的password字段
       } catch (err) {
         console.error('獲取預約數據時出錯:', err);
         setError(`無法載入預約數據: ${err.message}`);
@@ -104,10 +107,10 @@ function ReservationPage() {
       
       // 如果 API 調用成功，更新本地狀態
       if (response.status === 200) {
-        // 更新本地預約列表中的狀態
+        // 更新本地預約列表中的狀態和密碼
         const updatedReservations = reservations.map(reservation => {
           if (reservation._id === currentReservationId) {
-            return { ...reservation, status: 'confirmed' };
+            return { ...reservation, status: 'confirmed', password: password };
           }
           return reservation;
         });
@@ -117,7 +120,7 @@ function ReservationPage() {
         // 同時更新過濾後的預約列表
         const updatedFilteredReservations = filteredReservations.map(reservation => {
           if (reservation._id === currentReservationId) {
-            return { ...reservation, status: 'confirmed' };
+            return { ...reservation, status: 'confirmed', password: password };
           }
           return reservation;
         });
@@ -405,6 +408,7 @@ function ReservationPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">時間</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">預約者</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">場地</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">密碼</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">狀態</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
                 </tr>
@@ -423,6 +427,14 @@ function ReservationPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {reservation.courtId && reservation.courtId.name ? reservation.courtId.name : 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap font-medium">
+                        {/* 直接使用API返回的password字段 */}
+                        {reservation.status === 'confirmed' && reservation.password ? (
+                          reservation.password
+                        ) : (
+                          '----'
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 rounded-full text-xs ${
@@ -470,7 +482,7 @@ function ReservationPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
                       {viewMode === 'date' ? '這一天沒有預約記錄' : '沒有找到預約數據'}
                     </td>
                   </tr>
@@ -487,13 +499,15 @@ function ReservationPage() {
           <div className="bg-white rounded-lg p-6 shadow-lg w-full max-w-md">
             <h3 className="text-lg font-semibold mb-4">設置當日密碼</h3>
             <p className="text-gray-600 mb-4">請輸入此預約的密碼，使用者將使用此密碼開門</p>
-            <input
-              type="password"
-              className="w-full p-2 border border-gray-300 rounded mb-4"
-              placeholder="輸入密碼"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="relative">
+              <input
+                type="text"
+                className="w-full p-2 border border-gray-300 rounded mb-4"
+                placeholder="輸入密碼"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
             <div className="flex justify-end space-x-3">
               <button
                 className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
