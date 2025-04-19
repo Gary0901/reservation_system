@@ -194,7 +194,7 @@ export default function Calendar() {
       <div className="flex flex-col h-screen overflow-hidden" style={{ maxHeight: '85vh' }}>
         {/* 標籤欄 */}
         <div className="flex bg-amber-50">
-          <div className="py-3 px-5 ml-4 text-base font-bold bg-[#719e85] text-white">臨打</div>
+          <div className="py-3 px-5 ml-4 text-base font-bold bg-[#719e85] text-white">場地預約</div>
         </div>
 
         <hr className="border-t-1 border-[#719e85]"></hr>
