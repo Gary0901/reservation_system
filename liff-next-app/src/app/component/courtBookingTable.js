@@ -285,7 +285,7 @@ export const CourtBookingTable = ({ selectedDate, onClose, bookings = [] }) => {
       <div className="w-full h-full md:max-w-3xl md:h-auto md:max-h-screen bg-amber-50 md:rounded-md shadow-md flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-xl font-bold text-[#719e85]">
-            {formatDate(selectedDate)} 當日臨打
+            {formatDate(selectedDate)} 場地預約
           </h2>
           <button onClick={onClose} className="text-gray-500">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
