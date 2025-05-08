@@ -115,14 +115,22 @@ export default function MyReservation() {
         const reservationEndTime = res.endTime.split(':');
         const hour = parseInt(reservationEndTime[0]);
         const minute = parseInt(reservationEndTime[1]);
-  
+        
+        // 關鍵修改：處理跨天情況
+        let endDate = new Date(res.date);
+        // 如果結束時間小於開始時間，表示跨天
+        if (hour < parseInt(res.startTime.split(':')[0]) || 
+            (hour === parseInt(res.startTime.split(':')[0]) && minute < parseInt(res.startTime.split(':')[1]))) {
+          endDate.setDate(endDate.getDate() + 1); // 加一天
+        }
+
         // 設置預約結束的完整日期時間
-        reservationDate.setHours(hour, minute, 0, 0);
+        endDate.setHours(hour, minute, 0, 0);
         
         const now = new Date();
   
         let status = res.status;
-        if (status !== 'cancelled' && reservationDate < now) {
+        if (status !== 'cancelled' && endDate < now) {
           status = 'expired'; // 若預約結束時間已過現在時間，則標記為過期
         }
   
