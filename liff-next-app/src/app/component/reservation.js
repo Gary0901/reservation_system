@@ -112,20 +112,24 @@ export default function MyReservation() {
       const formattedReservations = response.data.map(res => {
         // 檢查預約日期是否已過期
         const reservationDate = new Date(res.date);
-        const reservationEndTime = res.endTime.split(':');
-        const hour = parseInt(reservationEndTime[0]);
-        const minute = parseInt(reservationEndTime[1]);
+        const [startHour, startMinute] = res.startTime.split(':').map(Number);
+        const [endHour, endMinute] = res.endTime.split(':').map(Number);
         
-        // 關鍵修改：處理跨天情況
-        let endDate = new Date(res.date);
-        // 如果結束時間小於開始時間，表示跨天
-        if (hour < parseInt(res.startTime.split(':')[0]) || 
-            (hour === parseInt(res.startTime.split(':')[0]) && minute < parseInt(res.startTime.split(':')[1]))) {
+        // 創建開始和結束時間的完整日期對象
+        const startDate = new Date(res.date);
+        startDate.setHours(startHour, startMinute, 0, 0);
+        
+        const endDate = new Date(res.date);
+        endDate.setHours(endHour, endMinute, 0, 0);
+        
+        // 改進的跨天邏輯
+        // 1. 如果結束時間小於開始時間
+        // 2. 或者結束時間是 00:00（午夜）
+        if (endHour < startHour || 
+            (endHour === startHour && endMinute < startMinute) || 
+            (endHour === 0 && endMinute === 0)) {
           endDate.setDate(endDate.getDate() + 1); // 加一天
         }
-
-        // 設置預約結束的完整日期時間
-        endDate.setHours(hour, minute, 0, 0);
         
         const now = new Date();
   
@@ -143,8 +147,9 @@ export default function MyReservation() {
           price: res.price,
           status: status, // 修正：使用計算後的status而不是原始res.status
           people_num: res.people_num,
-          password:res.password || '', 
-          rawDate: new Date(res.date) // 用於排序的完整日期對象
+          password: res.password || '', 
+          rawDate: new Date(res.date), // 用於排序的完整日期對象
+          endDateTime: endDate // 保存完整的結束日期時間，用於更精確的比較
         }
       });
   
@@ -219,26 +224,24 @@ export default function MyReservation() {
     }
   };
 
-  // 在渲染時也提示是否可以取消
-
   // 根據filterMode篩選預約
   const filteredReservations = reservations.filter(reservation => {
-  if (filterMode === 'upcoming') {
-    // 只顯示未過期且未取消的預約
-    return reservation.status !== 'cancelled' && reservation.status !== 'expired';
-  } else { // past
-    // 顯示已取消或已過期的預約
-    return reservation.status === 'cancelled' || reservation.status === 'expired';
-  }
-}).sort((a, b) => {
-  if (filterMode === 'upcoming') {
-    // 未來預約：從最近的未來日期開始（升序）
-    return a.rawDate - b.rawDate;
-  } else {
-    // 已取消/已過期：從最近的歷史日期開始（降序）
-    return b.rawDate - a.rawDate;
-  }
-});
+    if (filterMode === 'upcoming') {
+      // 只顯示未過期且未取消的預約
+      return reservation.status !== 'cancelled' && reservation.status !== 'expired';
+    } else { // past
+      // 顯示已取消或已過期的預約
+      return reservation.status === 'cancelled' || reservation.status === 'expired';
+    }
+  }).sort((a, b) => {
+    if (filterMode === 'upcoming') {
+      // 未來預約：從最近的未來日期開始（升序）
+      return a.rawDate - b.rawDate;
+    } else {
+      // 已取消/已過期：從最近的歷史日期開始（降序）
+      return b.rawDate - a.rawDate;
+    }
+  });
 
 
   if (loading) {
