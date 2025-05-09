@@ -83,13 +83,14 @@ export default function Home() {
   };
 
   const handleMap = () => {
-    const placeId = "ChIJy_g1ZEgjaDQR8UbtDK1mZro"; 
-    const placeName = "品朕羽球館"; // 請替換為您想去的地點名稱
+    const placeId = "ChIJPhaIXDBbuXYvhbiwzVGFveXVbhBDaXR5LCBQaW5ncmhIbHlFaXVtbCgwiiC5zblit5Zz-U6LeyMTY55be90DfviQiLo6ChQKEgIRGNZZ_lJGNBEHhXCAFLkChlUChiJJQJAG1lbiD3R7ekx-l6G394";
+    const placeName = "興埔路169巷89弄21-1號 品朕羽球館"; // 加上門牌號和場館名稱
+    
     const encodedPlaceName = encodeURIComponent(placeName);
     const mapsUrlWithPlaceId = `https://www.google.com/maps/search/?api=1&query=${encodedPlaceName}&query_place_id=${placeId}`;
-
+    
     window.open(mapsUrlWithPlaceId, '_blank');
-  }
+}
 
   // 更新預約須知函數
   const handleReservationInfo = () => {
