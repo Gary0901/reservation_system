@@ -86,7 +86,7 @@ export const BookingFormDialog = ({ isOpen, onClose, onSubmit, timeSlot, court, 
             <div className="mt-3 mb-4 p-3 bg-blue-50 rounded border border-blue-200">
               <p className="text-blue-700 text-sm mb-1">
                 <span className="font-medium">注意：</span> 第一次預約完請到官方Line告知
-                <span href="https://lin.ee/RElVfnS" className="font-medium underline">官方line 連結</span>
+                <p href="https://lin.ee/RElVfnS" className="font-medium underline">官方line 連結</p>
               </p>
               <p className="text-blue-700 text-sm">
                 <span className="font-medium">提醒：</span> 預約匯款完成後，會使用預約程式提供密碼給您
