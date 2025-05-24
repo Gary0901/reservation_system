@@ -400,44 +400,43 @@ function ReservationPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">序號</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">預約日期</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">時間</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">預約者</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">電話</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">場地</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">密碼</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">狀態</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">序號</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">預約日期</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">時間</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">預約者</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">電話</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">場地</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">密碼</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">狀態</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">操作</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredReservations.length > 0 ? (
                   filteredReservations.map((reservation, index) => (
                     <tr key={reservation._id || `reservation-${index}`} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{formatDate(reservation.date)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-4 whitespace-nowrap text-sm">{index + 1}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">{formatDate(reservation.date)}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">
                         {reservation.startTime || 'N/A'} - {reservation.endTime || ''}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">
                         {reservation.userId && reservation.userId.name ? reservation.userId.name : 'N/A'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">
                         {reservation.phone || 'N/A'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">
                         {reservation.courtId && reservation.courtId.name ? reservation.courtId.name : 'N/A'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap font-medium">
-                        {/* 直接使用API返回的password字段 */}
+                      <td className="px-3 py-4 whitespace-nowrap text-sm font-medium">
                         {reservation.status === 'confirmed' && reservation.password ? (
                           reservation.password
                         ) : (
                           '----'
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 rounded-full text-xs ${
                           reservation.status === 'confirmed' ? 'bg-green-100 text-green-800' :
                           reservation.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
@@ -445,22 +444,22 @@ function ReservationPage() {
                           'bg-blue-100 text-blue-800'
                         }`}>
                           {reservation.status === 'confirmed' ? '已確認' :
-                           reservation.status === 'pending' ? '待確認' :
-                           reservation.status === 'cancelled' ? '已取消' :
-                           reservation.isActive !== undefined ? (reservation.isActive ? '使用中' : '未使用') :
-                           '未知狀態'}
+                          reservation.status === 'pending' ? '待確認' :
+                          reservation.status === 'cancelled' ? '已取消' :
+                          reservation.isActive !== undefined ? (reservation.isActive ? '使用中' : '未使用') :
+                          '未知狀態'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-3 py-4 whitespace-nowrap text-sm">
                         {updateLoading ? (
                           <div className="inline-block animate-spin h-4 w-4 border border-gray-600 border-t-transparent rounded-full mr-2"></div>
                         ) : (
                           reservation.status !== 'cancelled' ? (
-                            <>
+                            <div className="flex flex-col gap-1">
                               <button 
                                 onClick={() => openPasswordModal(reservation._id)}
                                 disabled={reservation.status === 'confirmed' || updateLoading}
-                                className={`text-blue-600 hover:text-blue-900 mr-3 ${
+                                className={`text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 ${
                                   reservation.status === 'confirmed' ? 'opacity-50 cursor-not-allowed' : ''
                                 }`}
                               >
@@ -469,13 +468,13 @@ function ReservationPage() {
                               <button 
                                 onClick={() => handleCancelReservation(reservation._id)}
                                 disabled={updateLoading}
-                                className="text-red-600 hover:text-red-900"
+                                className="text-xs px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                               >
                                 取消
                               </button>
-                            </>
+                            </div>
                           ) : (
-                            <span className="text-gray-400">無操作</span>
+                            <span className="text-gray-400 text-xs">無操作</span>
                           )
                         )}
                       </td>
@@ -491,7 +490,7 @@ function ReservationPage() {
               </tbody>
             </table>
           </div>
-        )}
+          )}
       </div>
 
       {/* 密碼輸入模態框 */}
