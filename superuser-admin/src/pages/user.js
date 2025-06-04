@@ -70,7 +70,7 @@ function UserPage() {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">序號</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">姓名</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Line用戶識別</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用戶id</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">角色</th>
                   {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th> */}
                 </tr>
@@ -81,7 +81,7 @@ function UserPage() {
                     <tr key={user._id || user.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
                       <td className="px-6 py-4 whitespace-nowrap">{user.name || 'N/A'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{user.lineId || 'N/A'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{user._id || 'N/A'}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 rounded-full text-xs ${
                           user.role === 'superadmin' ? 'bg-purple-100 text-purple-800' :

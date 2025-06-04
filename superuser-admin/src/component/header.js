@@ -31,6 +31,9 @@ function Header({ user, onLogout }) {
               <Link to="/user" className={`px-4 py-2 rounded-lg hover:bg-[#4c7d62] transition-colors ${isActive('/user')}`}>
                 用戶管理
               </Link>
+              <Link to="/season_create" className={`px-4 py-2 rounded-lg hover:bg-[#4c7d62] transition-colors ${isActive('/season_create')}`}>
+                季打生成
+              </Link>
             </nav>
           </div>
           
