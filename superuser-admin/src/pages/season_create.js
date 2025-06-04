@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 function SeasonCreate() {
   const [formData, setFormData] = useState({
     startDate: '2025-06-01',
-    endDate: '2025-09-31',
+    endDate: '2025-09-30',
     startTime: '12:00',
     endTime: '15:00',
     userId: '',
@@ -27,9 +27,9 @@ function SeasonCreate() {
 
   // 場地選項
   const courts = [
-    { id: '67ecc9d54998ee57d673b053', name: 'Court A' },
-    { id: '67ecc9de4998ee57d673b055', name: 'Court B' },
-    { id: '67ecc9e64998ee57d673b057', name: 'Court C' }
+    { id: '67ecc9d54998ee57d673b053', name: 'Court ㄅ' },
+    { id: '67ecc9de4998ee57d673b055', name: 'Court ㄆ' },
+    { id: '67ecc9e64998ee57d673b057', name: 'Court ㄇ' }
   ];
 
   // 星期選項
