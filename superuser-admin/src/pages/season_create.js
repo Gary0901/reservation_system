@@ -93,6 +93,13 @@ function SeasonCreate() {
     setResults([]);
   };
 
+  // 取消預覽
+  const handleCancelPreview = () => {
+    setShowPreview(false);
+    setPreviewDates([]);
+    setResults([]);
+  };
+
   // 處理表單變更
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -346,7 +353,15 @@ function SeasonCreate() {
         {/* 預覽結果 */}
         {showPreview && previewDates.length > 0 && (
           <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4">預約詳情預覽</h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">預約詳情預覽</h3>
+              <button
+                onClick={handleCancelPreview}
+                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
+              >
+                取消預覽
+              </button>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
