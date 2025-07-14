@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // 【請替換】將此處換成您 API 的基礎 URL
 // 根據您的截圖，它可能是類似 'http://localhost:3000/api' 或您的線上伺服器網址
-const API_BASE_URL = 'http://liff-reservation.zeabur.app/api';
+const API_BASE_URL = 'https://liff-reservation.zeabur.app/api';
 
 function UserReservationSearchPage() {
   // 1. 狀態管理 (State Management)
@@ -103,7 +103,7 @@ function UserReservationSearchPage() {
           {reservations && !loading && !error && (
             <div>
               <h3 className="text-xl font-semibold mb-4">
-                查詢結果：<span className="font-mono text-gray-700">{searchedUserId}</span>
+                查詢結果：<span className="font-mono text-gray-700">{/*{searchedUserId}*/}</span>
               </h3>
               {reservations.length > 0 ? (
                 <div className="overflow-x-auto">
