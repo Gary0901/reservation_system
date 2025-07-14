@@ -34,6 +34,12 @@ function Header({ user, onLogout }) {
               <Link to="/season_create" className={`px-4 py-2 rounded-lg hover:bg-[#4c7d62] transition-colors ${isActive('/season_create')}`}>
                 季打生成
               </Link>
+              <Link to="/season_create" className={`px-4 py-2 rounded-lg hover:bg-[#4c7d62] transition-colors ${isActive('/season_create')}`}>
+                季打生成
+              </Link>
+              <Link to="/search_user_res" className={`px-4 py-2 rounded-lg hover:bg-[#4c7d62] transition-colors ${isActive('/search_user_res')}`}>
+                查詢使用者預約
+              </Link>
             </nav>
           </div>
           

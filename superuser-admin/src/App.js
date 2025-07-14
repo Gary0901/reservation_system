@@ -9,7 +9,8 @@ import ReservationPage from './pages/reservation';
 import TemplatePage from './pages/template';
 import TimeslotsPage from './pages/timeslots';
 import UserPage from './pages/user';
-import SeasonCreate from './pages/season_create'
+import SeasonCreate from './pages/season_create';
+import SearchUserRes from './pages/search_user_res';
 
 const API_URL = 'https://liff-reservation.zeabur.app';
 
@@ -91,6 +92,7 @@ function App() {
               <Route path="/timeslots" element={<TimeslotsPage />} />
               <Route path="/user" element={<UserPage />} />
               <Route path="/season_create" element={<SeasonCreate/>}/>
+              <Route path="/search_user_res" element={<SearchUserRes />} />
               <Route path="*" element={<Navigate to="/main" replace />} />
             </Routes>
           </div>
